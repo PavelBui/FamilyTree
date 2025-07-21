@@ -25,10 +25,16 @@ public class DateTimeUtils {
     }
 
     public String convertDateToString(LocalDate localDate) {
-        return localDate.format(FORMATTER);
+        if (localDate != null) {
+            return localDate.format(FORMATTER);
+        }
+        return null;
     }
 
     public LocalDate convertStringToDate(String timestamp) {
-        return LocalDate.parse(timestamp, FORMATTER);
+        if (timestamp != null) {
+            return LocalDate.parse(timestamp, FORMATTER);
+        }
+        return null;
     }
 }

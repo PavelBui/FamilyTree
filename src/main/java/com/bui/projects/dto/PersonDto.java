@@ -26,4 +26,5 @@ public class PersonDto {
     private String description;
     private Long updatedAt;
     private List<Integer> photoIds;
+    private String defaultPhotoName;
 }

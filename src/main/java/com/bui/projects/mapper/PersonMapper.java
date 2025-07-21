@@ -58,6 +58,7 @@ public class PersonMapper {
                 .description(personEntity.getDescription())
                 .updatedAt(DateTimeUtils.convertDateTimeToTimestamp(personEntity.getUpdatedAt()))
                 .photoIds(photoIdList)
+                .defaultPhotoName(personEntity.getDefaultPhoto().getName())
                 .build();
     }
 }

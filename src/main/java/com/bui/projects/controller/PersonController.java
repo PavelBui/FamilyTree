@@ -30,6 +30,32 @@ public class PersonController {
         return ResponseEntity.ok(personService.createPerson(personDto));
     }
 
+    @PutMapping("/{id}")
+    @ApiOperation("Update Person by id")
+    public ResponseEntity<PersonDto> updatePerson(@PathVariable Integer id, @RequestBody PersonDto personDto) {
+        return ResponseEntity.ok(personService.updatePerson(id, personDto));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation("Delete Person by id")
+    public ResponseEntity<String> deletePerson(@PathVariable Integer id) {
+        return ResponseEntity.ok(personService.deletePerson(id));
+    }
+
+    @GetMapping("/{id}")
+    @ApiOperation("Get Person by id")
+    public ResponseEntity<PersonDto> getPerson(@PathVariable Integer id) {
+        return ResponseEntity.ok(personService.getPerson(id));
+    }
+
+    @GetMapping
+    @ApiOperation("Get list of all Persons")
+    public ResponseEntity<List<PersonDto>> getAllPersons() {
+        return ResponseEntity.ok(personService.getAllPersons());
+    }
+
+    //Photos
     @PostMapping("/{id}/photo")
     @ApiOperation("Upload Photo")
     public ResponseEntity<String> uploadPhoto(@PathVariable Integer id, @RequestPart("file") MultipartFile file) {
@@ -55,19 +81,6 @@ public class PersonController {
         }
     }
 
-    @PutMapping("/{id}")
-    @ApiOperation("Update Person by id")
-    public ResponseEntity<PersonDto> updatePerson(@PathVariable Integer id, @RequestBody PersonDto personDto) {
-        return ResponseEntity.ok(personService.updatePerson(id, personDto));
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation("Delete Person by id")
-    public ResponseEntity<String> deletePerson(@PathVariable Integer id) {
-        return ResponseEntity.ok(personService.deletePerson(id));
-    }
-
     @GetMapping("/{id}/photo/{photoId}")
     @ApiOperation("Get Photo by photoId for Person by id")
     public ResponseEntity<byte[]> getPhoto(@PathVariable Integer id, @PathVariable Integer photoId) {
@@ -76,22 +89,17 @@ public class PersonController {
                 .body(personService.getPhoto(id, photoId).getPhotoBytes());
     }
 
-    @GetMapping("/{id}/images")
-    @ApiOperation("Get all photos for Photo by id")
+    @GetMapping("/{id}/photo")
+    @ApiOperation("Get all photos for Person by id")
     public ResponseEntity<List<PhotoDto>> getAllPhotos(@PathVariable Integer id) {
         return ResponseEntity.ok(personService.getAllPhotos(id));
     }
 
-    @GetMapping("/{id}")
-    @ApiOperation("Get Person by id")
-    public ResponseEntity<PersonDto> getPerson(@PathVariable Integer id) {
-        return ResponseEntity.ok(personService.getPerson(id));
-    }
-
-    @GetMapping
-    @ApiOperation("Get list of all Persons")
-    public ResponseEntity<List<PersonDto>> getAllPersons() {
-        return ResponseEntity.ok(personService.getAllPersons());
+    //Relationships
+    @GetMapping("/{id}/kids")
+    @ApiOperation("Get kids for Person by id")
+    public ResponseEntity<List<String>> getKids(@PathVariable Integer id) {
+        return ResponseEntity.ok(personService.getKids(id));
     }
 
 }

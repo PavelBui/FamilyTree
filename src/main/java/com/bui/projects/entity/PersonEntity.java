@@ -67,4 +67,7 @@ public class PersonEntity {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "persons_photos")
     private Set<PhotoEntity> photoEntities;
+
+    @Column(name = "chat_id")
+    private Long chatId;
 }

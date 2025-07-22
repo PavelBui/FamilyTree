@@ -10,11 +10,14 @@ import com.bui.projects.mapper.PhotoMapper;
 import com.bui.projects.service.PersonService;
 import com.bui.projects.mapper.PersonMapper;
 import com.bui.projects.repository.PersonRepository;
+import com.bui.projects.service.RelationshipService;
+import com.bui.projects.util.DateTimeUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +27,7 @@ public class PersonServiceImpl implements PersonService {
     private PersonMapper personMapper;
     private PersonRepository personRepository;
     private PhotoMapper photoMapper;
+    private RelationshipService relationshipService;
 
     @Override
     @Transactional
@@ -68,6 +72,7 @@ public class PersonServiceImpl implements PersonService {
                 .toList();
     }
 
+    //Photos
     @Override
     @Transactional
     public void uploadPhoto(Integer id, PhotoDto photoDto) {
@@ -96,5 +101,82 @@ public class PersonServiceImpl implements PersonService {
         return personEntity.getPhotoEntities().stream()
                 .map(entity -> photoMapper.entityToDto(entity))
                 .toList();
+    }
+
+    //Relationships
+    @Override
+    @Transactional
+    public String addRelationship(Integer peronId, Integer relatedPersonId, Integer relationType) {
+        PersonEntity personEntity = personRepository.findByIdAndIsDeletedFalse(peronId)
+                .orElseThrow(() -> new PersonNotFoundException((peronId)));
+        PersonEntity relatedPersonEntity = personRepository.findByIdAndIsDeletedFalse(relatedPersonId)
+                .orElseThrow(() -> new PersonNotFoundException((relatedPersonId)));
+        boolean result = relationshipService.createRelationship(personEntity.getId(), relatedPersonEntity.getId(), relationType);
+        if (result) {
+            return "Relationship was created successfully";
+        } else {
+            return "Relationship wasn't created";
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<String> getKids(Integer id) {
+        List<Integer> sonList = relationshipService.getSons(id);
+        List<String> resultList = new ArrayList<>(getPersonList(sonList, "сын"));
+        List<Integer> daughtersList = relationshipService.getDaughters(id);
+        resultList.addAll(getPersonList(daughtersList, "дочь"));
+        return resultList;
+    }
+
+    private List<String> getPersonList(List<Integer> indexList, String personType) {
+        List<String> resultList = new ArrayList<>();
+        for (int index : indexList) {
+            PersonEntity personEntity = personRepository.findByIdAndIsDeletedFalse(index)
+                    .orElseThrow(() -> new PersonNotFoundException((index)));
+            resultList.add(createPersonString(personEntity, personType));
+        }
+        return resultList;
+    }
+
+    private String createPersonString(PersonEntity personEntity, String personType) {
+        StringBuilder resultString = new StringBuilder(personType);
+        if (personEntity.getLastName() != null) {
+            resultString
+                    .append(" ")
+                    .append(personEntity.getLastName());
+        }
+        if (personEntity.getMaidenName() != null) {
+            resultString
+                    .append(" (")
+                    .append(personEntity.getMaidenName())
+                    .append(")");
+        }
+        if (personEntity.getFirstName() != null) {
+            resultString
+                    .append(" ")
+                    .append(personEntity.getFirstName());
+        }
+        if (personEntity.getMiddleName() != null) {
+            resultString
+                    .append(" ")
+                    .append(personEntity.getMiddleName());
+        }
+        if (DateTimeUtils.convertDateToString(personEntity.getBirthDate()) != null && DateTimeUtils.convertDateToString(personEntity.getDeathDate()) == null) {
+            resultString
+                    .append(" (род. ")
+                    .append(DateTimeUtils.convertDateToString(personEntity.getBirthDate()))
+                    .append(")");
+
+        }
+        if (DateTimeUtils.convertDateToString(personEntity.getBirthDate()) != null && DateTimeUtils.convertDateToString(personEntity.getDeathDate()) != null) {
+            resultString
+                    .append(" (")
+                    .append(DateTimeUtils.convertDateToString(personEntity.getBirthDate()))
+                    .append(" - ")
+                    .append(DateTimeUtils.convertDateToString(personEntity.getDeathDate()))
+                    .append(")");
+        }
+        return resultString.toString();
     }
 }

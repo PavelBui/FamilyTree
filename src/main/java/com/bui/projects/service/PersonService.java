@@ -22,4 +22,8 @@ public interface PersonService {
     PhotoDto getPhoto(Integer personId, Integer photoId);
 
     List<PhotoDto> getAllPhotos(Integer id);
+
+    String addRelationship(Integer peronId, Integer relatedPersonId, Integer relationType);
+
+    List<String> getKids(Integer id);
 }

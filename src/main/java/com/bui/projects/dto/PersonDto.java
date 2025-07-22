@@ -24,7 +24,9 @@ public class PersonDto {
     private String deathPlace;
     private String gender;
     private String description;
+    private Long chatId;
     private Long updatedAt;
     private List<Integer> photoIds;
     private String defaultPhotoName;
+    private List<Integer> relationshipIds;
 }

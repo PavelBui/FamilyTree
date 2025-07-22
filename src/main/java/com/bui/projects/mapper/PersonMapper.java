@@ -3,6 +3,7 @@ package com.bui.projects.mapper;
 import com.bui.projects.dto.PersonDto;
 import com.bui.projects.entity.PersonEntity;
 import com.bui.projects.entity.PhotoEntity;
+import com.bui.projects.service.RelationshipService;
 import com.bui.projects.util.DateTimeUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class PersonMapper {
 
+    private RelationshipService relationshipService;
 
     public PersonEntity dtoToEntity(PersonDto personDto) {
         PersonEntity personEntity = new PersonEntity();
@@ -32,6 +34,7 @@ public class PersonMapper {
         personEntity.setDeathPlace(personDto.getDeathPlace());
         personEntity.setGender(personDto.getGender());
         personEntity.setDescription(personDto.getDescription());
+        personEntity.setChatId(personDto.getChatId());
         personEntity.setUpdatedAt(DateTimeUtils.convertTimestampToDateTime(personDto.getUpdatedAt()));
         return personEntity;
     }
@@ -44,6 +47,7 @@ public class PersonMapper {
                     .map(PhotoEntity::getId)
                     .toList();
         }
+        List<Integer> relationshipIds = relationshipService.getRelationshipIds(personEntity.getId());
         return PersonDto.builder()
                 .id(personEntity.getId())
                 .firstName(personEntity.getFirstName())
@@ -56,9 +60,11 @@ public class PersonMapper {
                 .deathPlace(personEntity.getDeathPlace())
                 .gender(personEntity.getGender())
                 .description(personEntity.getDescription())
+                .chatId(personEntity.getChatId())
                 .updatedAt(DateTimeUtils.convertDateTimeToTimestamp(personEntity.getUpdatedAt()))
                 .photoIds(photoIdList)
                 .defaultPhotoName(personEntity.getDefaultPhoto().getName())
+                .relationshipIds(relationshipIds)
                 .build();
     }
 }

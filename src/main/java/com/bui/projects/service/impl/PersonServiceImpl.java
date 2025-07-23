@@ -40,11 +40,11 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public PersonDto updatePerson(Integer id, PersonDto personDto) {
-        PersonEntity atlasEntity = personRepository.findByIdAndIsDeletedFalse(id)
+        PersonEntity personEntity = personRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new PersonNotFoundException(id));
-        PersonEntity updatedAtlasEntity = personMapper.dtoToEntity(atlasEntity, personDto);
-        personRepository.save(updatedAtlasEntity);
-        return personMapper.entityToDto(updatedAtlasEntity);
+        PersonEntity updatedPersonEntity = personMapper.dtoToEntity(personEntity, personDto);
+        personRepository.save(updatedPersonEntity);
+        return personMapper.entityToDto(updatedPersonEntity);
     }
 
     @Override

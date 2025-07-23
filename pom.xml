@@ -20,7 +20,9 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <springfox.version>3.0.0</springfox.version>
-        <postgresql.version>42.5.4</postgresql.version>
+        <postgresql.version>42.7.7</postgresql.version>
+        <jupiter.version>5.13.4</jupiter.version>
+        <telegrambot.version>6.9.7.1</telegrambot.version>
     </properties>
 
     <dependencies>
@@ -53,8 +55,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.2</version>
+            <version>${jupiter.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots</artifactId>
+            <version>${telegrambot.version}</version>
         </dependency>
     </dependencies>
 

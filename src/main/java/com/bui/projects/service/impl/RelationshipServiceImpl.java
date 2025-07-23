@@ -46,14 +46,6 @@ public class RelationshipServiceImpl implements RelationshipService {
 
     @Override
     @Transactional
-    public List<Integer> getParents(Integer peronId) {
-        List<Integer> parentList = getRelationshipIdsByType(peronId, FATHER_TYPE);
-        parentList.addAll(getRelationshipIdsByType(peronId, MOTHER_TYPE));
-        return parentList;
-    }
-
-    @Override
-    @Transactional
     public List<Integer> getSons(Integer peronId) {
         return getRelationshipIdsByType(peronId, SON_TYPE);
     }
@@ -66,14 +58,6 @@ public class RelationshipServiceImpl implements RelationshipService {
 
     @Override
     @Transactional
-    public List<Integer> getKids(Integer peronId) {
-        List<Integer> kidList = getRelationshipIdsByType(peronId, SON_TYPE);
-        kidList.addAll(getRelationshipIdsByType(peronId, DAUGHTER_TYPE));
-        return kidList;
-    }
-
-    @Override
-    @Transactional
     public List<Integer> getBrothers(Integer peronId) {
         return getRelationshipIdsByType(peronId, BROTHER_TYPE);
     }
@@ -82,14 +66,6 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Transactional
     public List<Integer> getSisters(Integer peronId) {
         return getRelationshipIdsByType(peronId, SISTER_TYPE);
-    }
-
-    @Override
-    @Transactional
-    public List<Integer> getBrothersAndSisters(Integer peronId) {
-        List<Integer> brotherSisterList = getRelationshipIdsByType(peronId, BROTHER_TYPE);
-        brotherSisterList.addAll(getRelationshipIdsByType(peronId, SISTER_TYPE));
-        return brotherSisterList;
     }
 
     @Override

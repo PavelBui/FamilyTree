@@ -14,7 +14,7 @@ import static com.bui.projects.telegram.config.State.START;
 
 @Component
 @RequiredArgsConstructor
-public class TelegramRequestContext implements RequestContext {
+public class TelegramRequestContext {
 
     private static Sessions sessions;
 
@@ -24,7 +24,7 @@ public class TelegramRequestContext implements RequestContext {
         return sessions.getByChatId(chatId);
     }
 
-    public void authenticate(Update update) {
+    public void checkUser(Update update) {
         Long chatId = getChatId(update);
         User user = getUser(update);
         if (!sessions.existsByChatId(chatId)) {
@@ -47,10 +47,6 @@ public class TelegramRequestContext implements RequestContext {
                 sessions.setSession(chatId, Optional.of(sessionUser));
             }
         }
-    }
-
-    public void refresh(Update update) {
-        Long chatId = getChatId(update);
         SessionUser sessionUser = sessions.getByChatId(chatId);
         AccountDto account =
                 AccountDto.builder()
@@ -65,7 +61,6 @@ public class TelegramRequestContext implements RequestContext {
         } else {
             accountService.updateAccount(account);
         }
-        sessions.setSession(chatId, Optional.of(sessionUser));
     }
 
     private Long getChatId(Update update) {

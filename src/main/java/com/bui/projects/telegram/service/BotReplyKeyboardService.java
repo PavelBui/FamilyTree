@@ -7,16 +7,24 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class BotReplyKeyboardService {
 
+    private static final List<String> REPLY_KEYBOARD_BUTTONS = List.of("Родители", "Дети", "Братья и сестры", "Мужья и жены", "К себе", "Это я!");
+
     private final BotKeeper botKeeper;
 
-    public void sendMenuKeyboard(Update update, String text) {
-        Long chatId = getChatId(update);
-        ReplyKeyboard replyKeyboard = generateReplyKeyboard();
+    public void sendMenuKeyboard(Update update, String text, boolean isStart) {
+        ReplyKeyboard replyKeyboard = generateReplyKeyboard(isStart);
         sendKeyboard(update, text, replyKeyboard);
     }
 
@@ -36,46 +44,39 @@ public class BotReplyKeyboardService {
         }
     }
 
-    public ReplyKeyboard generateReplyKeyboard() {
+    public ReplyKeyboard generateReplyKeyboard(boolean isStart) {
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-//        List<CustomerReplyKeyboardEntity> customerReplyKeyboardEntityList = keyboardList();
-//        if (customerReplyKeyboardEntityList.isEmpty()) {
-//            ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
-//            replyKeyboardRemove.setRemoveKeyboard(true);
-//            return replyKeyboardRemove;
-//        }
-//        List<KeyboardRow> keyboardRowList = new ArrayList<>();
-//        int rows = (customerReplyKeyboardEntityList.size() + 1) / 2;
-//        for (int i = 0; i < rows; i++) {
-//            List<KeyboardButton> keyboardButtonList = new ArrayList<>();
-//            int leftButtonIndex = i * 2;
-//            keyboardButtonList.add(prepareButton(customerReplyKeyboardEntityList.get(leftButtonIndex) ,lang));
-//            if (leftButtonIndex + 1 < customerReplyKeyboardEntityList.size()) {
-//                keyboardButtonList.add(prepareButton(customerReplyKeyboardEntityList.get(leftButtonIndex + 1) ,lang));
-//            }
-//            keyboardRowList.add(new KeyboardRow(keyboardButtonList));
-//        }
-//        keyboardMarkup.setKeyboard(keyboardRowList);
-//        keyboardMarkup.setResizeKeyboard(true);
-//        keyboardMarkup.setOneTimeKeyboard(false);
-//        keyboardMarkup.setSelective(true);
+        if (REPLY_KEYBOARD_BUTTONS.isEmpty() || isStart) {
+            ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
+            replyKeyboardRemove.setRemoveKeyboard(true);
+            return replyKeyboardRemove;
+        }
+        List<KeyboardRow> keyboardRowList = new ArrayList<>();
+        int rows = (REPLY_KEYBOARD_BUTTONS.size() + 1) / 2;
+        for (int i = 0; i < rows; i++) {
+            List<KeyboardButton> keyboardButtonList = new ArrayList<>();
+            int leftButtonIndex = i * 2;
+            keyboardButtonList.add(prepareButton(REPLY_KEYBOARD_BUTTONS.get(leftButtonIndex)));
+            if (leftButtonIndex + 1 < REPLY_KEYBOARD_BUTTONS.size()) {
+                keyboardButtonList.add(prepareButton(REPLY_KEYBOARD_BUTTONS.get(leftButtonIndex + 1)));
+            }
+            keyboardRowList.add(new KeyboardRow(keyboardButtonList));
+        }
+        keyboardMarkup.setKeyboard(keyboardRowList);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setOneTimeKeyboard(false);
+        keyboardMarkup.setSelective(true);
         return keyboardMarkup;
     }
 
-//    KeyboardButton prepareButton(CustomerReplyKeyboardEntity customerReplyKeyboardEntity, Lang lang) {
-//        Set<CustomerReplyKeyboardContentEntity> customerReplyKeyboardContentEntityList = customerReplyKeyboardEntity.getReplyKeyboardContent();
-//        CustomerReplyKeyboardContentEntity customerReplyKeyboardContentEntity = customerReplyKeyboardContentEntityList.stream()
-//                .filter(entity -> lang.toString().equals(entity.getLanguage().getLanguage()))
-//                .findFirst().get();
-//        String buttonText = customerReplyKeyboardContentEntity.getReplyKeyboardText();
-//        String link = customerReplyKeyboardContentEntity.getReplyKeyboardLink();
-//        if (isTrue(customerReplyKeyboardEntity.getIsLink())) {
-//            return KeyboardButton.builder()
-//                    .text(buttonText)
-//                    .webApp(new WebAppInfo(link))
-//                    .build();
-//        } else {
-//            return new KeyboardButton(buttonText);
-//        }
-//    }
+    private KeyboardButton prepareButton(String text) {
+        if (text.startsWith("http:\\")) {
+            return KeyboardButton.builder()
+                    .text(text)
+                    .webApp(new WebAppInfo(text))
+                    .build();
+        } else {
+            return new KeyboardButton(text);
+        }
+    }
 }

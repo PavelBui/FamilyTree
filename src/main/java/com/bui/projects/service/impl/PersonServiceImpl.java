@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -62,6 +64,13 @@ public class PersonServiceImpl implements PersonService {
     public PersonDto getPerson(Integer id) {
         return personMapper.entityToDto(personRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new PersonNotFoundException((id))));
+    }
+
+    @Override
+    @Transactional
+    public PersonDto getPersonByChatId(Long chatId) {
+        Optional<PersonEntity> optionalPersonEntity = personRepository.findByChatIdAndIsDeletedFalse(chatId);
+        return optionalPersonEntity.map(personEntity -> personMapper.entityToDto(personEntity)).orElse(null);
     }
 
     @Override

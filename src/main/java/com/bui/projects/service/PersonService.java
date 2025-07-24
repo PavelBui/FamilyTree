@@ -15,6 +15,8 @@ public interface PersonService {
 
     PersonDto getPerson(Integer id);
 
+    PersonDto getPersonByChatId(Long chatId);
+
     List<PersonDto> getAllPersons();
 
     void uploadPhoto(Integer id, PhotoDto photoDto);

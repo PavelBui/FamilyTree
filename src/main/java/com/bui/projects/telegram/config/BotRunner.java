@@ -3,7 +3,7 @@ package com.bui.projects.telegram.config;
 import com.bui.projects.telegram.Bot;
 import com.bui.projects.telegram.BotKeeper;
 import com.bui.projects.telegram.handler.UpdateHandler;
-import com.bui.projects.telegram.session.RequestContext;
+import com.bui.projects.telegram.session.TelegramRequestContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +23,7 @@ public class BotRunner {
     private static final String BOT_WAS_NOT_CREATED_MESSAGE = "Telegram bots Api wasn't created";
 
     private final UpdateHandler updateHandler;
-    private final RequestContext requestContext;
+    private final TelegramRequestContext telegramRequestContext;
     private final BotKeeper botKeeper;
     private final TelegramBotProperties telegramBotProperties;
 
@@ -49,7 +49,7 @@ public class BotRunner {
 
     private Bot createBot(TelegramBotsApi api) {
         try {
-            Bot bot = new Bot(updateHandler, requestContext, telegramBotProperties);
+            Bot bot = new Bot(updateHandler, telegramRequestContext, telegramBotProperties);
             api.registerBot(bot);
             log.info("Connected to telegram bot");
             return bot;

@@ -63,7 +63,7 @@ public class PersonMapper {
                 .chatId(personEntity.getChatId())
                 .updatedAt(DateTimeUtils.convertDateTimeToTimestamp(personEntity.getUpdatedAt()))
                 .photoIds(photoIdList)
-                .defaultPhotoName(personEntity.getDefaultPhoto().getName())
+                .defaultPhotoId(personEntity.getDefaultPhoto().getId())
                 .relationshipIds(relationshipIds)
                 .build();
     }

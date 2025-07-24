@@ -1,27 +1,22 @@
 package com.bui.projects.telegram.handler;
 
 import com.bui.projects.telegram.BotKeeper;
-import com.bui.projects.telegram.service.BotSectionService;
+import com.bui.projects.telegram.service.BotMenuService;
 import com.bui.projects.telegram.service.BotService;
 import com.bui.projects.telegram.session.SessionUser;
 import com.bui.projects.telegram.session.TelegramRequestContext;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.MaybeInaccessibleMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
-import java.util.Optional;
 
 @Component
 @Slf4j
 public class CallBackHandler extends BaseMethods implements IBaseHandler {
 
     private final BotService botService;
-    private final BotSectionService sectionService;
+    private final BotMenuService sectionService;
 
-    public CallBackHandler(BotKeeper botKeeper, BotService botService, BotSectionService sectionService) {
+    public CallBackHandler(BotKeeper botKeeper, BotService botService, BotMenuService sectionService) {
         super(botKeeper);
         this.botService = botService;
         this.sectionService = sectionService;
@@ -30,7 +25,6 @@ public class CallBackHandler extends BaseMethods implements IBaseHandler {
     @Override
     public void handle(Update update) {
         try {
-            addUserIdToLogs(update);
             sectionService.prepare(update);
             botService.prepare(update);
 
@@ -38,6 +32,12 @@ public class CallBackHandler extends BaseMethods implements IBaseHandler {
             SessionUser sessionUser = TelegramRequestContext.requestUser(chatId);
 
             checkSpecialMessage(update);
+            switch (sessionUser.getState()) {
+//                case START -> selectLanguageCallbackHandler.handle(update);
+//                case HOME -> selectCountryCallbackHandler.handle(update);
+//                case TRAVEL -> selectRegionCallBackHandler.handle(update);
+//                case DEFAULT -> changeLanguageCallbackHandler.handle(update);
+            }
 
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -58,14 +58,5 @@ public class CallBackHandler extends BaseMethods implements IBaseHandler {
 //        } else if (data.contains("read")) {
 //            familyTreeBot.executeMessage(editMsgObject(botService.sendPostViewedMessage(update, sessionUser), update));
 //        }
-    }
-
-    private void addUserIdToLogs(Update update) {
-        String chatId = Optional.ofNullable(update.getCallbackQuery())
-                .map(CallbackQuery::getMessage)
-                .map(MaybeInaccessibleMessage::getChatId)
-                .map(Object::toString).orElse("Undefined");
-        MDC.put("chatId", chatId);
-        MDC.put("typeId", "callback");
     }
 }

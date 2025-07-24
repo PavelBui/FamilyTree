@@ -27,6 +27,6 @@ public class PersonDto {
     private Long chatId;
     private Long updatedAt;
     private List<Integer> photoIds;
-    private String defaultPhotoName;
+    private Integer defaultPhotoId;
     private List<Integer> relationshipIds;
 }

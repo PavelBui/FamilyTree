@@ -2,7 +2,7 @@ package com.bui.projects.telegram;
 
 import com.bui.projects.telegram.config.TelegramBotProperties;
 import com.bui.projects.telegram.handler.UpdateHandler;
-import com.bui.projects.telegram.session.RequestContext;
+import com.bui.projects.telegram.session.TelegramRequestContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class Bot extends TelegramLongPollingBot {
 
     private final UpdateHandler handler;
-    private final RequestContext requestContext;
+    private final TelegramRequestContext telegramRequestContext;
     private final TelegramBotProperties telegramBotProperties;
 
     @Override
@@ -36,9 +36,8 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        requestContext.authenticate(update);
+        telegramRequestContext.checkUser(update);
         handler.handle(update);
-        requestContext.refresh(update);
     }
 
     public void executeMessage(BotApiMethod<?> message) {

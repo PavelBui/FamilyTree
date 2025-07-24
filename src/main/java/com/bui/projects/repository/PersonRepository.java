@@ -12,5 +12,7 @@ public interface PersonRepository extends JpaRepository<PersonEntity, Integer> {
 
     Optional<PersonEntity> findByIdAndIsDeletedFalse(Integer id);
 
+    Optional<PersonEntity> findByChatIdAndIsDeletedFalse(Long chatId);
+
     List<PersonEntity> findAllByIsDeletedFalse();
 }

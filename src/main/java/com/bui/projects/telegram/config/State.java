@@ -7,7 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum State {
     START("new_account"),
-    SELECT_PROJECT("get_project"),
+    HOME("person_page"),
+    TRAVEL("travel"),
     DEFAULT("default");
     private final String code;
 

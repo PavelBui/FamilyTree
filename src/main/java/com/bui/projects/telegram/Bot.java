@@ -34,6 +34,10 @@ public class Bot extends TelegramLongPollingBot {
         return telegramBotProperties.getToken();
     }
 
+    public Integer getDefaultPersonId() {
+        return telegramBotProperties.getDefaultPersonId();
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
         telegramRequestContext.checkUser(update);

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -26,7 +27,7 @@ public class RelationshipServiceImpl implements RelationshipService {
 
     @Override
     @Transactional
-    public List<Integer> getRelationshipIds(Integer peronId) {
+    public List<Integer> getRelationships(Integer peronId) {
         return relationshipRepository.findAllByPersonId(peronId).stream()
                 .map(RelationshipEntity::getRelatedPersonId)
                 .toList();
@@ -34,50 +35,74 @@ public class RelationshipServiceImpl implements RelationshipService {
 
     @Override
     @Transactional
+    public List<Integer> getParents(Integer peronId) {
+        return getRelationshipIdsByType(peronId, List.of(FATHER_TYPE, MOTHER_TYPE));
+    }
+
+    @Override
+    @Transactional
+    public List<Integer> getKids(Integer peronId) {
+        return getRelationshipIdsByType(peronId, List.of(SON_TYPE, DAUGHTER_TYPE));
+    }
+
+    @Override
+    @Transactional
+    public List<Integer> getSiblings(Integer peronId) {
+        return getRelationshipIdsByType(peronId, List.of(BROTHER_TYPE, SISTER_TYPE));
+    }
+
+    @Override
+    @Transactional
+    public List<Integer> getSpouses(Integer peronId) {
+        return getRelationshipIdsByType(peronId, List.of(HUSBAND_TYPE, WIFE_TYPE));
+    }
+
+    @Override
+    @Transactional
     public List<Integer> getFathers(Integer peronId) {
-        return getRelationshipIdsByType(peronId, FATHER_TYPE);
+        return getRelationshipIdsByType(peronId, List.of(FATHER_TYPE));
     }
 
     @Override
     @Transactional
     public List<Integer> getMothers(Integer peronId) {
-        return getRelationshipIdsByType(peronId, MOTHER_TYPE);
+        return getRelationshipIdsByType(peronId, List.of(MOTHER_TYPE));
     }
 
     @Override
     @Transactional
     public List<Integer> getSons(Integer peronId) {
-        return getRelationshipIdsByType(peronId, SON_TYPE);
+        return getRelationshipIdsByType(peronId, List.of(SON_TYPE));
     }
 
     @Override
     @Transactional
     public List<Integer> getDaughters(Integer peronId) {
-        return getRelationshipIdsByType(peronId, DAUGHTER_TYPE);
+        return getRelationshipIdsByType(peronId, List.of(DAUGHTER_TYPE));
     }
 
     @Override
     @Transactional
     public List<Integer> getBrothers(Integer peronId) {
-        return getRelationshipIdsByType(peronId, BROTHER_TYPE);
+        return getRelationshipIdsByType(peronId, List.of(BROTHER_TYPE));
     }
 
     @Override
     @Transactional
     public List<Integer> getSisters(Integer peronId) {
-        return getRelationshipIdsByType(peronId, SISTER_TYPE);
+        return getRelationshipIdsByType(peronId, List.of(SISTER_TYPE));
     }
 
     @Override
     @Transactional
     public List<Integer> getHusbands(Integer peronId) {
-        return getRelationshipIdsByType(peronId, HUSBAND_TYPE);
+        return getRelationshipIdsByType(peronId, List.of(HUSBAND_TYPE));
     }
 
     @Override
     @Transactional
     public List<Integer> getWifies(Integer peronId) {
-        return getRelationshipIdsByType(peronId, WIFE_TYPE);
+        return getRelationshipIdsByType(peronId, List.of(WIFE_TYPE));
     }
 
     @Override
@@ -92,9 +117,9 @@ public class RelationshipServiceImpl implements RelationshipService {
         }
     }
 
-    private List<Integer> getRelationshipIdsByType(Integer peronId, Integer relationType) {
-        return relationshipRepository.findAllByPersonIdAndRelationType(peronId, relationType).stream()
+    private List<Integer> getRelationshipIdsByType(Integer peronId, List<Integer> relationTypes) {
+        return relationshipRepository.findAllByPersonIdAndRelationTypeIn(peronId, relationTypes).stream()
                 .map(RelationshipEntity::getRelatedPersonId)
-                .toList();
+                .collect(Collectors.toList());
     }
 }

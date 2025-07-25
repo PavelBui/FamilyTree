@@ -11,6 +11,6 @@ public interface RelationshipRepository extends JpaRepository<RelationshipEntity
 
     List<RelationshipEntity> findAllByPersonId(Integer personId);
 
-    List<RelationshipEntity> findAllByPersonIdAndRelationType(Integer personId, Integer relationType);
+    List<RelationshipEntity> findAllByPersonIdAndRelationTypeIn(Integer personId, List<Integer> relationTypes);
 
 }

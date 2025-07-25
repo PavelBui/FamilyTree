@@ -36,7 +36,9 @@ public class BotRunner {
                 botKeeper.setTelegramBot(bot);
                 SetMyCommands setMyCommands = new SetMyCommands();
                 List<BotCommand> botCommandList = List.of(
-                        new BotCommand("me", "It's me")
+                        new BotCommand("me", "It's me"),
+                        new BotCommand("home", "Go home"),
+                        new BotCommand("start", "Restart")
                 );
                 setMyCommands.setCommands(botCommandList);
                 bot.execute(setMyCommands);

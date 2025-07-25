@@ -4,7 +4,12 @@ import java.util.List;
 
 public interface RelationshipService {
 
-    List<Integer> getRelationshipIds(Integer peronId);
+    List<Integer> getRelationships(Integer peronId);
+
+    List<Integer> getParents(Integer peronId);
+    List<Integer> getKids(Integer peronId);
+    List<Integer> getSiblings(Integer peronId);
+    List<Integer> getSpouses(Integer peronId);
 
     List<Integer> getFathers(Integer peronId);
     List<Integer> getMothers(Integer peronId);

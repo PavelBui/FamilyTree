@@ -47,7 +47,6 @@ public class PersonMapper {
                     .map(PhotoEntity::getId)
                     .toList();
         }
-        List<Integer> relationshipIds = relationshipService.getRelationshipIds(personEntity.getId());
         return PersonDto.builder()
                 .id(personEntity.getId())
                 .firstName(personEntity.getFirstName())
@@ -64,7 +63,11 @@ public class PersonMapper {
                 .updatedAt(DateTimeUtils.convertDateTimeToTimestamp(personEntity.getUpdatedAt()))
                 .photoIds(photoIdList)
                 .defaultPhotoId(personEntity.getDefaultPhoto().getId())
-                .relationshipIds(relationshipIds)
+                .relationshipIds(relationshipService.getRelationships(personEntity.getId()))
+                .parentsIds(relationshipService.getParents(personEntity.getId()))
+                .kidsIds(relationshipService.getKids(personEntity.getId()))
+                .siblingsIds(relationshipService.getSiblings(personEntity.getId()))
+                .spousesIds(relationshipService.getSpouses(personEntity.getId()))
                 .build();
     }
 }

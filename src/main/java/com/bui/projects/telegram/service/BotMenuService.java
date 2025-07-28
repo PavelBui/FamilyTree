@@ -10,16 +10,16 @@ import com.bui.projects.util.ResourceFileLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -50,68 +50,57 @@ public class BotMenuService extends BaseService {
         }
     }
 
-    public SendPhoto sendHomePointMessage(SessionUser sessionUser) throws IOException {
+    public EditMessageMedia sendHomePointMessage(Integer messageId, SessionUser sessionUser, Integer defaultPersonId) throws IOException {
         PersonDto personDto = personService.getPersonByChatId(sessionUser.getChatId());
         if (personDto != null) {
-            PhotoDto photoDto = personService.getPhoto(personDto.getId(), personDto.getDefaultPhotoId());
-            File tempFile = File.createTempFile("temp_", "_" + sessionUser.getLastname() + sessionUser.getLastname());
-            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                fos.write(photoDto.getPhotoBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            File tempFile = getPersonDefaultPhoto(personDto);
             String messageText = personDto.getFullDescription();
-            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto);
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, null, defaultPersonId);
+            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
+        }
+        return null;
+    }
+
+    public SendPhoto sendNewHomePointMessage(SessionUser sessionUser, Integer defaultPersonId) throws IOException {
+        PersonDto personDto = personService.getPersonByChatId(sessionUser.getChatId());
+        if (personDto != null) {
+            File tempFile = getPersonDefaultPhoto(personDto);
+            String messageText = personDto.getFullDescription();
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, null, defaultPersonId);
             return createSendPhoto(messageText, tempFile, inlineKeyboardMarkup);
         }
         return null;
     }
 
-    public SendPhoto sendDefaultPointMessage(Integer defaultPersonId) throws IOException {
+    public EditMessageMedia sendDefaultPointMessage(SessionUser sessionUser, Integer messageId, Integer defaultPersonId) throws IOException {
+        PersonDto personDtoByChatId = personService.getPersonByChatId(sessionUser.getChatId());
         PersonDto personDto = personService.getPerson(defaultPersonId);
         if (personDto != null) {
-            PhotoDto photoDto = personService.getPhoto(personDto.getId(), personDto.getDefaultPhotoId());
-            File tempFile = File.createTempFile("temp_", "_" + personDto.getLastName() + personDto.getFirstName());
-            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                fos.write(photoDto.getPhotoBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            File tempFile = getPersonDefaultPhoto(personDto);
             String messageText = personDto.getFullDescription();
-            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto);
-            return createSendPhoto(messageText, tempFile, inlineKeyboardMarkup);
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, personDtoByChatId.getId(), null);
+            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
         }
         return null;
     }
 
-    public SendPhoto sendPersonMessage(String stringId) throws IOException {
+    public EditMessageMedia sendPersonMessage(SessionUser sessionUser, Integer messageId, String stringId, Integer defaultPersonId) throws IOException {
+        PersonDto personDtoByChatId = personService.getPersonByChatId(sessionUser.getChatId());
         PersonDto personDto = personService.getPerson(Integer.parseInt(stringId));
         if (personDto != null) {
-            PhotoDto photoDto = personService.getPhoto(personDto.getId(), personDto.getDefaultPhotoId());
-            File tempFile = File.createTempFile("temp_", "_" + personDto.getLastName() + personDto.getFirstName());
-            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                fos.write(photoDto.getPhotoBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            File tempFile = getPersonDefaultPhoto(personDto);
             String messageText = personDto.getFullDescription();
-            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto);
-            return createSendPhoto(messageText, tempFile, inlineKeyboardMarkup);
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, personDtoByChatId.getId(), defaultPersonId);
+            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
         }
         return null;
     }
 
-    public SendPhoto sendPersonsListMessage(String personsType) throws IOException {
+    public EditMessageMedia sendPersonsListMessage(Integer messageId, String personsType) throws IOException {
         Integer personId = Integer.parseInt(personsType.replace("go_parents", "").replace("go_kids", "").replace("go_siblings", "").replace("go_spouses", ""));
         PersonDto personDto = personService.getPerson(personId);
         if (personDto != null) {
-            PhotoDto photoDto = personService.getPhoto(personDto.getId(), personDto.getDefaultPhotoId());
-            File tempFile = File.createTempFile("temp_", "_" + personDto.getLastName() + personDto.getLastName());
-            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                fos.write(photoDto.getPhotoBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            File tempFile = getPersonDefaultPhoto(personDto);
             String messageText = "";
             List<Integer> personList = new ArrayList<>();
             if (personsType.startsWith("go_parents")) {
@@ -131,7 +120,7 @@ public class BotMenuService extends BaseService {
                 messageText = "Супруг(и):";
             }
             InlineKeyboardMarkup inlineKeyboardMarkup = createPersonListKeyboard(personList, personsType);
-            return createSendPhoto(messageText, tempFile, inlineKeyboardMarkup);
+            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
         }
         return null;
     }
@@ -141,7 +130,7 @@ public class BotMenuService extends BaseService {
         return MarkupTemplates.listEntityButtons(parentSections, 1);
     }
 
-    private InlineKeyboardMarkup createPersonPointKeyboard(PersonDto personDto) {
+    private InlineKeyboardMarkup createPersonPointKeyboard(PersonDto personDto, Integer homePersonId, Integer defaultPersonId) {
         Map<String, String> parentSections = new HashMap<>();
         if (!personDto.getParentsIds().isEmpty()) {
             parentSections.put("go_parents" + personDto.getId(), "Родители (" + personDto.getParentsIds().size() + ")");
@@ -155,9 +144,13 @@ public class BotMenuService extends BaseService {
         if (!personDto.getSpousesIds().isEmpty()) {
             parentSections.put("go_spouses" + personDto.getId(), "Супруг(и) (" + personDto.getSpousesIds().size() + ")");
         }
-        parentSections.put("go_home", "Вернуться к себе");
-        parentSections.put("go_default", "Персона по-умолчанию");
-        return MarkupTemplates.listEntityButtons(parentSections, 1);
+        if (homePersonId != null && !homePersonId.equals(personDto.getId())) {
+            parentSections.put("go_home", "Вернуться к себе");
+        }
+        if (defaultPersonId != null && !defaultPersonId.equals(personDto.getId())) {
+            parentSections.put("go_default", "Персона по-умолчанию");
+        }
+        return MarkupTemplates.listEntityButtons(parentSections, 2);
     }
 
     private InlineKeyboardMarkup createPersonListKeyboard(List<Integer> personList, String personsType) {
@@ -181,5 +174,30 @@ public class BotMenuService extends BaseService {
         sendPhoto.setParseMode("HTML");
         sendPhoto.setReplyMarkup(inlineKeyboardMarkup);
         return sendPhoto;
+    }
+
+    private EditMessageMedia createEditMessageMedia(Integer messageId, String messageText, File file, InlineKeyboardMarkup inlineKeyboardMarkup) {
+        InputMedia inputMedia = new InputMediaPhoto();
+        inputMedia.setMedia(file, file.getName());
+        inputMedia.setCaption(messageText);
+        inputMedia.setParseMode("HTML");
+        EditMessageMedia editMessageMedia = new EditMessageMedia(chatId.toString(), messageId, null, inputMedia, inlineKeyboardMarkup);
+        editMessageMedia.setChatId(chatId);
+        return editMessageMedia;
+    }
+
+    private File getPersonDefaultPhoto(PersonDto personDto) throws IOException {
+        if (personDto.getDefaultPhotoId() != null) {
+            PhotoDto photoDto = personService.getPhoto(personDto.getId(), personDto.getDefaultPhotoId());
+            File tempFile = File.createTempFile("temp_", "_" + personDto.getLastName() + personDto.getLastName());
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                fos.write(photoDto.getPhotoBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return tempFile;
+        } else {
+            return ResourceFileLoader.loadResourceAsTempFile("defaultphoto.jpg");
+        }
     }
 }

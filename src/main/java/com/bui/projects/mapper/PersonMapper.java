@@ -8,6 +8,7 @@ import com.bui.projects.util.DateTimeUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +36,7 @@ public class PersonMapper {
         personEntity.setGender(personDto.getGender());
         personEntity.setDescription(personDto.getDescription());
         personEntity.setChatId(personDto.getChatId());
-        personEntity.setUpdatedAt(DateTimeUtils.convertTimestampToDateTime(personDto.getUpdatedAt()));
+        personEntity.setUpdatedAt(LocalDateTime.now());
         return personEntity;
     }
 
@@ -62,7 +63,7 @@ public class PersonMapper {
                 .chatId(personEntity.getChatId())
                 .updatedAt(DateTimeUtils.convertDateTimeToTimestamp(personEntity.getUpdatedAt()))
                 .photoIds(photoIdList)
-                .defaultPhotoId(personEntity.getDefaultPhoto().getId())
+                .defaultPhotoId(personEntity.getDefaultPhoto() != null ? personEntity.getDefaultPhoto().getId() : null)
                 .relationshipIds(relationshipService.getRelationships(personEntity.getId()))
                 .parentsIds(relationshipService.getParents(personEntity.getId()))
                 .kidsIds(relationshipService.getKids(personEntity.getId()))

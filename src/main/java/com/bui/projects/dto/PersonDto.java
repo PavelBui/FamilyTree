@@ -37,6 +37,7 @@ public class PersonDto {
     @JsonIgnore
     private List<Integer> spousesIds;
 
+    @JsonIgnore
     public String getFullDescription() {
         StringBuilder nameString = new StringBuilder();
         if (this.getLastName() != null) {

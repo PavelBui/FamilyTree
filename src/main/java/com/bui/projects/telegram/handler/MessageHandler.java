@@ -51,9 +51,16 @@ public class MessageHandler extends BaseMethods implements IBaseHandler {
         Long chatId = getChatId(update);
         SessionUser sessionUser = TelegramRequestContext.requestUser(chatId);
         String messageText = update.getMessage().getText();
+        Integer defaultPersonId = botKeeper.getTelegramBot().getDefaultPersonId();
         switch (messageText) {
-//            case "/me" -> changeUserLanguage(sessionUser);
-            case "/home" -> botKeeper.getBot().sendPhoto(botMenuService.sendHomePointMessage(sessionUser));
+            case "/home" -> {
+                log.info("ChatId: {}. Command /home", chatId);
+                botKeeper.getBot().sendPhoto(botMenuService.sendNewHomePointMessage(sessionUser, defaultPersonId));
+            }
+            case "/me" -> {
+                log.info("ChatId: {}. Command /me", chatId);
+//                botKeeper.getBot().sendPhoto(botMenuService.sendNewHomePointMessage(sessionUser, defaultPersonId));
+            }
         }
     }
 
@@ -66,6 +73,7 @@ public class MessageHandler extends BaseMethods implements IBaseHandler {
         SessionUser sessionUser = TelegramRequestContext.requestUser(chatId);
 // Пока не используем ReplyKeyboard
 //        botReplyKeyboardService.sendMenuKeyboard(update, "Добро пожаловать в Семейное древо!", true);
+        log.info("ChatId: {}. Command /start", chatId);
         botKeeper.getBot().sendPhoto(botMenuService.sendStartPointMessage(sessionUser));
     }
 

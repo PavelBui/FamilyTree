@@ -79,7 +79,18 @@ public class MarkupTemplates {
         List<InlineKeyboardButton> row = new ArrayList<>();
 
         int index = 1;
-        for (Map.Entry<String, String> entry : map.entrySet()) {
+        List<Map.Entry<String, String>> sortedEntries = new ArrayList<>(map.entrySet());
+        sortedEntries.sort((e1, e2) -> {
+            if (e1.getKey().equals("go_default")) return 1;
+            if (e2.getKey().equals("go_default")) return -1;
+
+            if (e1.getKey().equals("go_home")) return 1;
+            if (e2.getKey().equals("go_home")) return -1;
+
+            return e1.getValue().compareTo(e2.getValue());
+        });
+
+        for (Map.Entry<String, String> entry : sortedEntries) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
             inlineKeyboardButton.setText(entry.getValue() != null ? entry.getValue() : "");
             if (entry.getKey().endsWith("url")) {

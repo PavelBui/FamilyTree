@@ -1,6 +1,6 @@
 package com.bui.projects.telegram.session;
 
-import com.bui.projects.telegram.config.State;
+import com.bui.projects.telegram.util.enums.State;
 import lombok.*;
 
 @Data

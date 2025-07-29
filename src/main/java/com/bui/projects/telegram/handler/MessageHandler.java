@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.io.IOException;
+import static com.bui.projects.telegram.util.Constants.*;
 
 
 @Slf4j
@@ -29,55 +29,33 @@ public class MessageHandler extends BaseMethods implements IBaseHandler {
 
     @Override
     public void handle(Update update) {
-        try {
-            botMenuService.prepare(update);
+        botMenuService.prepare(update);
 
-            start(update);
-//            Long chatId = getChatId(update);
-//            SessionUser sessionUser = TelegramRequestContext.requestUser(chatId);
-            menu(update);
-//            switch (sessionUser.getState()) {
-//                case START -> menu(update);
-//                case HOME -> menu(update);
-//                case TRAVEL -> menu(update);
-//                case DEFAULT -> menu(update);
-//            }
-        } catch (Exception exception) {
-            log.error(exception.getMessage(), exception);
-        }
-    }
-
-    private void menu(Update update) throws IOException {
-        Long chatId = getChatId(update);
-        SessionUser sessionUser = TelegramRequestContext.requestUser(chatId);
         String messageText = update.getMessage().getText();
-        Integer defaultPersonId = botKeeper.getTelegramBot().getDefaultPersonId();
-        switch (messageText) {
-            case "/home" -> {
-                log.info("ChatId: {}. Command /home", chatId);
-                botKeeper.getBot().sendPhoto(botMenuService.sendNewHomePointMessage(sessionUser, defaultPersonId));
-            }
-            case "/me" -> {
-                log.info("ChatId: {}. Command /me", chatId);
-//                botKeeper.getBot().sendPhoto(botMenuService.sendNewHomePointMessage(sessionUser, defaultPersonId));
-            }
-        }
-    }
-
-    private void start(Update update) {
-        String text = update.getMessage().getText();
-        if (text == null || !text.startsWith("/start")) {
+        if (messageText == null) {
             return;
         }
         Long chatId = getChatId(update);
         SessionUser sessionUser = TelegramRequestContext.requestUser(chatId);
-// Пока не используем ReplyKeyboard
-//        botReplyKeyboardService.sendMenuKeyboard(update, "Добро пожаловать в Семейное древо!", true);
-        log.info("ChatId: {}. Command /start", chatId);
-        botKeeper.getBot().sendPhoto(botMenuService.sendStartPointMessage(sessionUser));
+        provideLog(chatId, messageText);
+        if (messageText.startsWith(START_COMMAND)) {
+//            Пока не используем ReplyKeyboard
+//            botReplyKeyboardService.sendMenuKeyboard(update, "Добро пожаловать в Семейное древо!", true);
+            botKeeper.getBot().sendPhoto(botMenuService.sendStartPointMessage(sessionUser));
+            return;
+        }
+        Integer defaultPersonId = botKeeper.getTelegramBot().getDefaultPersonId();
+        switch (messageText) {
+            case HOME_COMMAND -> botKeeper.getBot().sendPhoto(botMenuService.sendNewHomePointMessage(sessionUser, defaultPersonId));
+            case ME_COMMAND -> botKeeper.getBot().sendPhoto(botMenuService.sendNewHomePointMessage(sessionUser, defaultPersonId));
+        }
     }
 
     private Long getChatId(Update update) {
         return update.getMessage().getChatId();
+    }
+
+    private void provideLog(Long chatId, String messageText) {
+        log.info("ChatId: {}. Command {}", chatId, messageText);
     }
 }

@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.util.List;
 
+import static com.bui.projects.telegram.util.Constants.*;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -98,13 +100,20 @@ public class PersonDto {
         return nameString.toString() + dateString + this.getDescription();
     }
 
+    @JsonIgnore
     public String getFullName(String personsType) {
         StringBuilder nameString = new StringBuilder();
-        switch (personsType) {
-            case "go_parents": nameString.append("M".equals(this.gender) ? "Папа " : "Мама "); break;
-            case "go_kids": nameString.append("M".equals(this.gender) ? "Сын " : "Дочь "); break;
-            case "go_siblings": nameString.append("M".equals(this.gender) ? "Брат " : "Сестра "); break;
-            case "go_spouses": nameString.append("M".equals(this.gender) ? "Муж " : "Жена "); break;
+        if (personsType.startsWith(PARENTS.buttonPrefix())) {
+            nameString.append(this.isMale() ? PARENTS.male() : PARENTS.female()).append(" ");
+        }
+        if (personsType.startsWith(KIDS.buttonPrefix())) {
+            nameString.append(this.isMale() ? KIDS.male() : KIDS.female()).append(" ");
+        }
+        if (personsType.startsWith(SIBLINGS.buttonPrefix())) {
+            nameString.append(this.isMale() ? SIBLINGS.male() : SIBLINGS.female()).append(" ");
+        }
+        if (personsType.startsWith(SPOUSES.buttonPrefix())) {
+            nameString.append(this.isMale() ? SPOUSES.male() : SPOUSES.female()).append(" ");
         }
         if (this.getLastName() != null) {
             nameString
@@ -142,5 +151,10 @@ public class PersonDto {
                     .append(")");
         }
         return nameString.toString();
+    }
+
+    @JsonIgnore
+    public boolean isMale() {
+        return "M".equals(this.gender);
     }
 }

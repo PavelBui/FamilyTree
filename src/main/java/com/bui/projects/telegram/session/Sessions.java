@@ -1,7 +1,7 @@
 package com.bui.projects.telegram.session;
 
 import com.bui.projects.dto.AccountDto;
-import com.bui.projects.telegram.config.State;
+import com.bui.projects.telegram.util.enums.State;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

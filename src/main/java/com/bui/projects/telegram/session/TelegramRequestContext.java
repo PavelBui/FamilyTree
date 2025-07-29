@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.util.Optional;
 
-import static com.bui.projects.telegram.config.State.START;
+import static com.bui.projects.telegram.util.enums.State.START;
 
 @Component
 @RequiredArgsConstructor

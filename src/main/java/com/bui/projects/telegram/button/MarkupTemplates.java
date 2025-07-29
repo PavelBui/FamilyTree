@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.bui.projects.telegram.util.Constants.DEFAULT_BUTTON;
+import static com.bui.projects.telegram.util.Constants.HOME_BUTTON;
+
 @UtilityClass
 public class MarkupTemplates {
 
@@ -81,11 +84,11 @@ public class MarkupTemplates {
         int index = 1;
         List<Map.Entry<String, String>> sortedEntries = new ArrayList<>(map.entrySet());
         sortedEntries.sort((e1, e2) -> {
-            if (e1.getKey().equals("go_default")) return 1;
-            if (e2.getKey().equals("go_default")) return -1;
+            if (e1.getKey().equals(DEFAULT_BUTTON)) return 1;
+            if (e2.getKey().equals(DEFAULT_BUTTON)) return -1;
 
-            if (e1.getKey().equals("go_home")) return 1;
-            if (e2.getKey().equals("go_home")) return -1;
+            if (e1.getKey().equals(HOME_BUTTON)) return 1;
+            if (e2.getKey().equals(HOME_BUTTON)) return -1;
 
             return e1.getValue().compareTo(e2.getValue());
         });

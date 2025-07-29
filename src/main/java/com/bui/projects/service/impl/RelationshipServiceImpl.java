@@ -10,18 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.bui.projects.telegram.util.Constants.*;
+
 @Service
 @AllArgsConstructor
 public class RelationshipServiceImpl implements RelationshipService {
-
-    private static final Integer FATHER_TYPE = 1;
-    private static final Integer MOTHER_TYPE = 2;
-    private static final Integer SON_TYPE = 5;
-    private static final Integer DAUGHTER_TYPE = 6;
-    private static final Integer BROTHER_TYPE = 9;
-    private static final Integer SISTER_TYPE = 10;
-    private static final Integer HUSBAND_TYPE = 11;
-    private static final Integer WIFE_TYPE = 12;
 
     private RelationshipRepository relationshipRepository;
 

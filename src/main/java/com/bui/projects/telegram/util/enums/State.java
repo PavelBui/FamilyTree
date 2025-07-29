@@ -1,4 +1,4 @@
-package com.bui.projects.telegram.config;
+package com.bui.projects.telegram.util.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

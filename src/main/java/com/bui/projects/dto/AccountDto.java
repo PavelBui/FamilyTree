@@ -1,6 +1,6 @@
 package com.bui.projects.dto;
 
-import com.bui.projects.telegram.config.State;
+import com.bui.projects.telegram.util.enums.State;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -18,6 +18,7 @@ public class Constants {
     //Button codes
     public static final String HOME_BUTTON = "go_home";
     public static final String DEFAULT_BUTTON = "go_default";
+    public static final String PHOTO_BUTTON_PREFIX = "go_photos_";
     public static final String PERSON_BUTTON_PREFIX = "go_person_";
     public static final String MULTI_PERSON_BUTTON_SUFFIX = "_multi";
 
@@ -36,6 +37,7 @@ public class Constants {
     public static final String HOME_TEXT = "Вернуться к себе";
     public static final String FIND_HOME_TEXT = "Найти себя";
     public static final String DEFAULT_TEXT = "Персона по-умолчанию";
+    public static final String PHOTO_TEXT = "Все фотографии";
     public static final String INTRO_TEXT = "Нажмите на кнопку \"Найти себя\", чтобы найти себя в семейном древе используя Телеграм идентификатор, или нажмите на кнопку \"Персона по-умолчанию\", чтобы загрузить персону по-умолчанию и начать путешествие по семейному древу.";
     public static final String WELCOME_PERSON_TEXT = "Добро пожаловать, ";
     public static final String WELCOME_UNKNOWN_TEXT = "Добро пожаловать!";

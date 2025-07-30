@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
-public class UpdateHandler implements IBaseHandler {
+public class UpdateHandler {
 
     private final MessageHandler messageHandler;
     private final CallBackHandler callbackHandler;
@@ -14,7 +14,6 @@ public class UpdateHandler implements IBaseHandler {
         this.callbackHandler = callbackHandler;
     }
 
-    @Override
     public void handle(Update update) {
         if (update.hasMessage()) {
             messageHandler.handle(update);

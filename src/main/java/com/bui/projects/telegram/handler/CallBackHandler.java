@@ -17,59 +17,59 @@ import static com.bui.projects.telegram.util.Constants.*;
 
 @Component
 @Slf4j
-public class CallBackHandler extends BaseMethods implements IBaseHandler {
+public class CallBackHandler {
 
+    public final BotKeeper botKeeper;
     private final BotMenuService botMenuService;
 
     public CallBackHandler(BotKeeper botKeeper, BotMenuService botMenuService) {
-        super(botKeeper);
+        this.botKeeper = botKeeper;
         this.botMenuService = botMenuService;
     }
 
-    @Override
     public void handle(Update update) {
         botMenuService.prepare(update);
 
         Long chatId = getChatId(update);
         SessionUser sessionUser = TelegramRequestContext.requestUser(chatId);
 
-        checkSpecialMessage(update);
         String data = update.getCallbackQuery().getData();
         Integer messageId = getUpdateMessageId(update);
         Integer defaultPersonId = botKeeper.getTelegramBot().getDefaultPersonId();
         provideLog(chatId, data);
         if (HOME_BUTTON.equals(data)) {
             sessionUser.setState(State.HOME);
-            botKeeper.getBot().editPhoto(botMenuService.sendHomePointMessage(messageId, sessionUser, defaultPersonId));
+            botKeeper.getBot().editPhoto(botMenuService.prepareHomePointEditMessageMedia(messageId, defaultPersonId));
             return;
         }
         if (DEFAULT_BUTTON.equals(data)) {
             sessionUser.setState(State.DEFAULT);
-            botKeeper.getBot().editPhoto(botMenuService.sendDefaultPointMessage(sessionUser, messageId, defaultPersonId));
+            botKeeper.getBot().editPhoto(botMenuService.prepareDefaultPointEditMessageMedia(messageId, defaultPersonId));
+            return;
+        }
+        if (data.startsWith(PHOTO_BUTTON_PREFIX)) {
+            sessionUser.setState(State.PHOTO);
+            botKeeper.getBot().sendMediaGroup(botMenuService.preparePhotosSendMediaGroup(messageId, data.replace(PHOTO_BUTTON_PREFIX, "")));
+            botKeeper.getBot().executeMessage(botMenuService.prepareSendMessage(data.replace(PHOTO_BUTTON_PREFIX, "")));
+            botKeeper.getBot().deleteMessage(botMenuService.prepareDeleteMessage(messageId));
             return;
         }
         if (data.startsWith(PERSON_BUTTON_PREFIX)) {
             sessionUser.setState(State.TRAVEL);
-            botKeeper.getBot().editPhoto(botMenuService.sendPersonMessage(sessionUser, messageId, data.replace(PERSON_BUTTON_PREFIX, ""), defaultPersonId));
+            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(messageId, data.replace(PERSON_BUTTON_PREFIX, ""), defaultPersonId));
             return;
         }
         sessionUser.setState(State.TRAVEL);
         if (data.endsWith(MULTI_PERSON_BUTTON_SUFFIX)) {
-            botKeeper.getBot().editPhoto(botMenuService.sendPersonsListMessage(messageId, data));
+            botKeeper.getBot().editPhoto(botMenuService.preparePersonsListEditMessageMedia(messageId, data));
         } else {
             String[] components = data.split("_");
-            botKeeper.getBot().editPhoto(botMenuService.sendPersonMessage(sessionUser, messageId, components[2], defaultPersonId));
+            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(messageId, components[2], defaultPersonId));
         }
     }
 
     private Long getChatId(Update update) {
         return update.getCallbackQuery().getMessage().getChatId();
-    }
-
-    private void checkSpecialMessage(Update update) {
-        if (update.getCallbackQuery().getData().startsWith("cancel")) {
-            deleteMessage(update.getCallbackQuery().getMessage().getChatId(), update.getCallbackQuery().getMessage().getMessageId());
-        }
     }
 
     private Integer getUpdateMessageId(Update update) {

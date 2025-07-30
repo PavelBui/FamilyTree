@@ -104,7 +104,7 @@ public class RelationshipServiceImpl implements RelationshipService {
         try {
             RelationshipEntity relationshipEntity = new RelationshipEntity(peronId, relatedPersonId, relationType);
             RelationshipEntity savedRelationshipEntity = relationshipRepository.save(relationshipEntity);
-            return savedRelationshipEntity != null && savedRelationshipEntity.getId() != null;
+            return savedRelationshipEntity.getId() != null;
         } catch (Exception e) {
             return false;
         }
@@ -113,6 +113,6 @@ public class RelationshipServiceImpl implements RelationshipService {
     private List<Integer> getRelationshipIdsByType(Integer peronId, List<Integer> relationTypes) {
         return relationshipRepository.findAllByPersonIdAndRelationTypeIn(peronId, relationTypes).stream()
                 .map(RelationshipEntity::getRelatedPersonId)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

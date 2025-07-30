@@ -9,6 +9,7 @@ public enum State {
     START("new_account"),
     HOME("person_page"),
     TRAVEL("travel"),
+    PHOTO("photo"),
     DEFAULT("default");
     private final String code;
 

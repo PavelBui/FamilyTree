@@ -4,14 +4,16 @@ import com.bui.projects.dto.PersonDto;
 import com.bui.projects.dto.PhotoDto;
 import com.bui.projects.service.PersonService;
 import com.bui.projects.telegram.button.MarkupTemplates;
-import com.bui.projects.telegram.session.SessionUser;
 import com.bui.projects.telegram.session.Sessions;
 import com.bui.projects.telegram.util.Constants;
 import com.bui.projects.util.ResourceFileLoader;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
@@ -37,10 +39,10 @@ public class BotMenuService extends BaseService {
     }
 
     @SneakyThrows
-    public SendPhoto sendStartPointMessage(SessionUser sessionUser) {
+    public SendPhoto prepareStartPointSendMessage() {
         File file = ResourceFileLoader.loadResourceAsTempFile(START_IMAGE_FILE);
         StringBuilder messageText = new StringBuilder();
-        PersonDto personDto = personService.getPersonByChatId(sessionUser.getChatId());
+        PersonDto personDto = personService.getPersonByChatId(chatId);
         if (personDto != null) {
             messageText.append(WELCOME_PERSON_TEXT).append(personDto.getLastName()).append(" ").append(personDto.getFirstName()).append(" ").append(personDto.getMiddleName()).append("!");
         } else {
@@ -51,21 +53,10 @@ public class BotMenuService extends BaseService {
         return createSendPhoto(messageText.toString(), file, inlineKeyboardMarkup);
     }
 
-    public EditMessageMedia sendHomePointMessage(Integer messageId, SessionUser sessionUser, Integer defaultPersonId) {
-        PersonDto personDto = personService.getPersonByChatId(sessionUser.getChatId());
+    public SendPhoto prepareHomePointSendPhoto(Integer defaultPersonId) {
+        PersonDto personDto = personService.getPersonByChatId(chatId);
         if (personDto != null) {
-            File tempFile = getPersonDefaultPhoto(personDto);
-            String messageText = personDto.getFullDescription();
-            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, null, defaultPersonId);
-            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
-        }
-        return null;
-    }
-
-    public SendPhoto sendNewHomePointMessage(SessionUser sessionUser, Integer defaultPersonId) {
-        PersonDto personDto = personService.getPersonByChatId(sessionUser.getChatId());
-        if (personDto != null) {
-            File tempFile = getPersonDefaultPhoto(personDto);
+            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
             String messageText = personDto.getFullDescription();
             InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, null, defaultPersonId);
             return createSendPhoto(messageText, tempFile, inlineKeyboardMarkup);
@@ -73,11 +64,22 @@ public class BotMenuService extends BaseService {
         return null;
     }
 
-    public EditMessageMedia sendDefaultPointMessage(SessionUser sessionUser, Integer messageId, Integer defaultPersonId) {
-        PersonDto personDtoByChatId = personService.getPersonByChatId(sessionUser.getChatId());
+    public EditMessageMedia prepareHomePointEditMessageMedia(Integer messageId, Integer defaultPersonId) {
+        PersonDto personDto = personService.getPersonByChatId(chatId);
+        if (personDto != null) {
+            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
+            String messageText = personDto.getFullDescription();
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, null, defaultPersonId);
+            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
+        }
+        return null;
+    }
+
+    public EditMessageMedia prepareDefaultPointEditMessageMedia(Integer messageId, Integer defaultPersonId) {
+        PersonDto personDtoByChatId = personService.getPersonByChatId(chatId);
         PersonDto personDto = personService.getPerson(defaultPersonId);
         if (personDto != null) {
-            File tempFile = getPersonDefaultPhoto(personDto);
+            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
             String messageText = personDto.getFullDescription();
             InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, personDtoByChatId.getId(), null);
             return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
@@ -85,11 +87,11 @@ public class BotMenuService extends BaseService {
         return null;
     }
 
-    public EditMessageMedia sendPersonMessage(SessionUser sessionUser, Integer messageId, String stringId, Integer defaultPersonId) {
-        PersonDto personDtoByChatId = personService.getPersonByChatId(sessionUser.getChatId());
+    public EditMessageMedia preparePersonEditMessageMedia(Integer messageId, String stringId, Integer defaultPersonId) {
+        PersonDto personDtoByChatId = personService.getPersonByChatId(chatId);
         PersonDto personDto = personService.getPerson(Integer.parseInt(stringId));
         if (personDto != null) {
-            File tempFile = getPersonDefaultPhoto(personDto);
+            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
             String messageText = personDto.getFullDescription();
             InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, personDtoByChatId.getId(), defaultPersonId);
             return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
@@ -97,16 +99,16 @@ public class BotMenuService extends BaseService {
         return null;
     }
 
-    public EditMessageMedia sendPersonsListMessage(Integer messageId, String personsType) {
+    public EditMessageMedia preparePersonsListEditMessageMedia(Integer messageId, String personsType) {
         Integer personId = Integer.parseInt(personsType
-                                                .replace(PARENTS.buttonPrefix(), "")
-                                                .replace(KIDS.buttonPrefix(), "")
-                                                .replace(SIBLINGS.buttonPrefix(), "")
-                                                .replace(SPOUSES.buttonPrefix(), "")
-                                                .replace(MULTI_PERSON_BUTTON_SUFFIX,""));
+                .replace(PARENTS.buttonPrefix(), "")
+                .replace(KIDS.buttonPrefix(), "")
+                .replace(SIBLINGS.buttonPrefix(), "")
+                .replace(SPOUSES.buttonPrefix(), "")
+                .replace(MULTI_PERSON_BUTTON_SUFFIX,""));
         PersonDto personDto = personService.getPerson(personId);
         if (personDto != null) {
-            File tempFile = getPersonDefaultPhoto(personDto);
+            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
             String messageText = "";
             List<Integer> personList = new ArrayList<>();
             if (personsType.startsWith(PARENTS.buttonPrefix())) {
@@ -131,6 +133,42 @@ public class BotMenuService extends BaseService {
         return null;
     }
 
+    public SendMediaGroup preparePhotosSendMediaGroup(Integer messageId, String stringId) {
+        Integer personId = Integer.parseInt(stringId);
+        PersonDto personDto = personService.getPerson(personId);
+        if (personDto != null) {
+            List<File> tempFiles = new ArrayList<>();
+            personDto.getPhotoIds().stream()
+                    .limit(10)
+                    .forEach(photoId -> tempFiles.add(getPersonPhotoFile(personDto, photoId)));
+            return createMediaGroupMessage(messageId, tempFiles);
+        }
+        return null;
+    }
+
+    public DeleteMessage prepareDeleteMessage(Integer messageId) {
+        DeleteMessage deleteMessage = new DeleteMessage();
+        deleteMessage.setChatId(chatId);
+        deleteMessage.setMessageId(messageId);
+        return deleteMessage;
+    }
+
+    public SendMessage prepareSendMessage(String stringId) {
+        PersonDto personDto = personService.getPerson(Integer.parseInt(stringId));
+        if (personDto != null) {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId);
+            sendMessage.setText("Выберите действие:");
+
+            Map<String, String> parentSections = new HashMap<>();
+            parentSections.put(PERSON_BUTTON_PREFIX + personDto.getId(), "Вернуться");
+            InlineKeyboardMarkup inlineKeyboardMarkup = MarkupTemplates.listEntityButtons(parentSections, 1);
+            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+            return sendMessage;
+        }
+        return null;
+    }
+
     private InlineKeyboardMarkup createStartPointKeyboard() {
         Map<String, String> parentSections = Map.of(HOME_BUTTON, FIND_HOME_TEXT, DEFAULT_BUTTON, DEFAULT_TEXT);
         return MarkupTemplates.listEntityButtons(parentSections, 1);
@@ -146,6 +184,9 @@ public class BotMenuService extends BaseService {
                 .ifPresent(entry -> parentSections.put(entry.getKey(), entry.getValue()));
         checkRelationshipList(personDto.getSpousesIds(), personDto.getId(), SPOUSES)
                 .ifPresent(entry -> parentSections.put(entry.getKey(), entry.getValue()));
+        if (personDto.getPhotoIds() != null && personDto.getPhotoIds().size() > 1) {
+            parentSections.put(PHOTO_BUTTON_PREFIX + personDto.getId(), PHOTO_TEXT);
+        }
         if (homePersonId != null && !homePersonId.equals(personDto.getId())) {
             parentSections.put(HOME_BUTTON, HOME_TEXT);
         }
@@ -153,6 +194,17 @@ public class BotMenuService extends BaseService {
             parentSections.put(DEFAULT_BUTTON, DEFAULT_TEXT);
         }
         return MarkupTemplates.listEntityButtons(parentSections, 2);
+    }
+
+    private InlineKeyboardMarkup createPersonListKeyboard(List<Integer> personList, String personsType) {
+        Map<String, String> parentSections = new HashMap<>();
+        for (int personId : personList) {
+            PersonDto personDto = personService.getPerson(personId);
+            parentSections.put(PERSON_BUTTON_PREFIX + personId, personDto.getFullName(personsType));
+        }
+        parentSections.put(HOME_BUTTON, HOME_TEXT);
+        parentSections.put(DEFAULT_BUTTON, DEFAULT_TEXT);
+        return MarkupTemplates.listEntityButtons(parentSections, 1);
     }
 
     private Optional<Map.Entry<String, String>> checkRelationshipList(List<Integer> relationshipIds, Integer personId, Constants.RelationshipGroup constants) {
@@ -199,17 +251,6 @@ public class BotMenuService extends BaseService {
         return true;
     }
 
-    private InlineKeyboardMarkup createPersonListKeyboard(List<Integer> personList, String personsType) {
-        Map<String, String> parentSections = new HashMap<>();
-        for (int personId : personList) {
-            PersonDto personDto = personService.getPerson(personId);
-            parentSections.put(PERSON_BUTTON_PREFIX + personId, personDto.getFullName(personsType));
-        }
-        parentSections.put(HOME_BUTTON, HOME_TEXT);
-        parentSections.put(DEFAULT_BUTTON, DEFAULT_TEXT);
-        return MarkupTemplates.listEntityButtons(parentSections, 1);
-    }
-
     private SendPhoto createSendPhoto(String messageText, File file, InlineKeyboardMarkup inlineKeyboardMarkup) {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
@@ -232,10 +273,25 @@ public class BotMenuService extends BaseService {
         return editMessageMedia;
     }
 
+    private SendMediaGroup createMediaGroupMessage(Integer messageId, List<File> files) {
+        List<InputMedia> inputMediaList = new ArrayList<>();
+        for (File file : files) {
+            InputMedia inputMedia = new InputMediaPhoto();
+            inputMedia.setMedia(file, file.getName());
+            inputMediaList.add(inputMedia);
+        }
+        SendMediaGroup sendMediaGroup = new SendMediaGroup(chatId.toString(), inputMediaList);
+        sendMediaGroup.setChatId(chatId);
+        sendMediaGroup.setReplyToMessageId(messageId);
+        sendMediaGroup.setAllowSendingWithoutReply(true);
+        sendMediaGroup.setProtectContent(true);
+        return sendMediaGroup;
+    }
+
     @SneakyThrows
-    private File getPersonDefaultPhoto(PersonDto personDto) {
+    private File getPersonPhotoFile(PersonDto personDto, Integer photoId) {
         if (personDto.getDefaultPhotoId() != null) {
-            PhotoDto photoDto = personService.getPhoto(personDto.getId(), personDto.getDefaultPhotoId());
+            PhotoDto photoDto = personService.getPhoto(personDto.getId(), photoId);
             File tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX + personDto.getLastName() + personDto.getLastName());
             try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 fos.write(photoDto.getPhotoBytes());

@@ -12,6 +12,7 @@ import lombok.*;
 public class SessionUser {
     private Long chatId;
     private State state;
+    private Integer personId;
     private String firstname;
     private String lastname;
     private String username;

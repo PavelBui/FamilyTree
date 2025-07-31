@@ -21,6 +21,7 @@ public class AccountMapper {
         accountEntity.setFirstName(accountDto.getFirstName());
         accountEntity.setUserName(accountDto.getUserName());
         accountEntity.setState(accountDto.getState());
+        accountEntity.setPersonId(accountDto.getPersonId());
         return accountEntity;
     }
 
@@ -31,6 +32,7 @@ public class AccountMapper {
                 .firstName(accountEntity.getFirstName())
                 .userName(accountEntity.getUserName())
                 .state(accountEntity.getState())
+                .personId(accountEntity.getPersonId())
                 .build();
     }
 }

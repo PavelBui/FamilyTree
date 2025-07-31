@@ -14,6 +14,7 @@ public class AccountDto {
 
     private Long chatId;
     private State state;
+    private Integer personId;
     private String firstName;
     private String lastName;
     private String userName;

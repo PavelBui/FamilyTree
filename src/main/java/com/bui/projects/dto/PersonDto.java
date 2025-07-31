@@ -154,6 +154,26 @@ public class PersonDto {
     }
 
     @JsonIgnore
+    public String getShortName() {
+        StringBuilder nameString = new StringBuilder();
+        if (this.getLastName() != null) {
+            nameString
+                    .append(this.getLastName());
+        }
+        if (this.getFirstName() != null) {
+            nameString
+                    .append(" ")
+                    .append(this.getFirstName());
+        }
+        if (this.getMiddleName() != null) {
+            nameString
+                    .append(" ")
+                    .append(this.getMiddleName());
+        }
+        return nameString.isEmpty() ? "Неизвестный" : nameString.toString();
+    }
+
+    @JsonIgnore
     public boolean isMale() {
         return "M".equals(this.gender);
     }

@@ -40,12 +40,11 @@ public class BotMenuService extends BaseService {
     }
 
     @SneakyThrows
-    public SendPhoto prepareStartPointSendMessage() {
+    public SendPhoto prepareStartPointSendMessage(PersonDto personDto) {
         File file = ResourceFileLoader.loadResourceAsTempFile(START_IMAGE_FILE);
         StringBuilder messageText = new StringBuilder();
-        PersonDto personDto = personService.getPersonByChatId(chatId);
         if (personDto != null) {
-            messageText.append(WELCOME_PERSON_TEXT).append(personDto.getLastName()).append(" ").append(personDto.getFirstName()).append(" ").append(personDto.getMiddleName()).append("!");
+            messageText.append(WELCOME_PERSON_TEXT).append(personDto.getShortName()).append("!");
         } else {
             messageText.append(WELCOME_UNKNOWN_TEXT);
         }
@@ -54,8 +53,27 @@ public class BotMenuService extends BaseService {
         return createSendPhoto(messageText.toString(), file, inlineKeyboardMarkup);
     }
 
-    public SendPhoto prepareHomePointSendPhoto(Integer defaultPersonId) {
-        PersonDto personDto = personService.getPersonByChatId(chatId);
+    public EditMessageMedia prepareHomePointEditMessageMedia(PersonDto personDto, Integer messageId, Integer defaultPersonId) {
+        if (personDto != null) {
+            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
+            String messageText = personDto.getFullDescription();
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, null, defaultPersonId);
+            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
+        }
+        return null;
+    }
+
+    public EditMessageMedia prepareDefaultPointEditMessageMedia(PersonDto personDto, Integer messageId, Integer homePersonId) {
+        if (personDto != null) {
+            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
+            String messageText = personDto.getFullDescription();
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, homePersonId, null);
+            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
+        }
+        return null;
+    }
+
+    public SendPhoto preparePersonSendPhoto(PersonDto personDto, Integer defaultPersonId) {
         if (personDto != null) {
             File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
             String messageText = personDto.getFullDescription();
@@ -65,49 +83,17 @@ public class BotMenuService extends BaseService {
         return null;
     }
 
-    public EditMessageMedia prepareHomePointEditMessageMedia(Integer messageId, Integer defaultPersonId) {
-        PersonDto personDto = personService.getPersonByChatId(chatId);
+    public EditMessageMedia preparePersonEditMessageMedia(PersonDto personDto, Integer messageId, Integer homePersonId, Integer defaultPersonId) {
         if (personDto != null) {
             File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
             String messageText = personDto.getFullDescription();
-            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, null, defaultPersonId);
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, homePersonId, defaultPersonId);
             return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
         }
         return null;
     }
 
-    public EditMessageMedia prepareDefaultPointEditMessageMedia(Integer messageId, Integer defaultPersonId) {
-        PersonDto personDtoByChatId = personService.getPersonByChatId(chatId);
-        PersonDto personDto = personService.getPerson(defaultPersonId);
-        if (personDto != null) {
-            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
-            String messageText = personDto.getFullDescription();
-            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, personDtoByChatId.getId(), null);
-            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
-        }
-        return null;
-    }
-
-    public EditMessageMedia preparePersonEditMessageMedia(Integer messageId, String stringId, Integer defaultPersonId) {
-        PersonDto personDtoByChatId = personService.getPersonByChatId(chatId);
-        PersonDto personDto = personService.getPerson(Integer.parseInt(stringId));
-        if (personDto != null) {
-            File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
-            String messageText = personDto.getFullDescription();
-            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonPointKeyboard(personDto, personDtoByChatId.getId(), defaultPersonId);
-            return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
-        }
-        return null;
-    }
-
-    public EditMessageMedia preparePersonsListEditMessageMedia(Integer messageId, String personsType) {
-        Integer personId = Integer.parseInt(personsType
-                .replace(PARENTS.buttonPrefix(), "")
-                .replace(KIDS.buttonPrefix(), "")
-                .replace(SIBLINGS.buttonPrefix(), "")
-                .replace(SPOUSES.buttonPrefix(), "")
-                .replace(MULTI_PERSON_BUTTON_SUFFIX,""));
-        PersonDto personDto = personService.getPerson(personId);
+    public EditMessageMedia preparePersonsListEditMessageMedia(PersonDto personDto, Integer messageId, String personsType, Integer homePersonId) {
         if (personDto != null) {
             File tempFile = getPersonPhotoFile(personDto, personDto.getDefaultPhotoId());
             String messageText = "";
@@ -128,15 +114,13 @@ public class BotMenuService extends BaseService {
                 personList.addAll(personDto.getSpousesIds());
                 messageText = SPOUSES.list();
             }
-            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonListKeyboard(personList, personsType);
+            InlineKeyboardMarkup inlineKeyboardMarkup = createPersonListKeyboard(personList, personsType, homePersonId);
             return createEditMessageMedia(messageId, messageText, tempFile, inlineKeyboardMarkup);
         }
         return null;
     }
 
-    public SendMediaGroup preparePhotosSendMediaGroup(String stringId) {
-        Integer personId = Integer.parseInt(stringId);
-        PersonDto personDto = personService.getPerson(personId);
+    public SendMediaGroup preparePhotosSendMediaGroup(PersonDto personDto) {
         if (personDto != null) {
             List<File> tempFiles = new ArrayList<>();
             personDto.getPhotoIds().stream()
@@ -154,8 +138,7 @@ public class BotMenuService extends BaseService {
         return deleteMessage;
     }
 
-    public SendMessage prepareSendMessage(String stringId, List<Message> photoMessageList) {
-        PersonDto personDto = personService.getPerson(Integer.parseInt(stringId));
+    public SendMessage preparePhotosSendMessage(PersonDto personDto, List<Message> photoMessageList) {
         if (personDto != null) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(chatId);
@@ -172,6 +155,13 @@ public class BotMenuService extends BaseService {
             return sendMessage;
         }
         return null;
+    }
+
+    public SendMessage prepareSendMessage(String message) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(message);
+        return sendMessage;
     }
 
     private InlineKeyboardMarkup createStartPointKeyboard() {
@@ -201,13 +191,15 @@ public class BotMenuService extends BaseService {
         return MarkupTemplates.listEntityButtons(parentSections, 2);
     }
 
-    private InlineKeyboardMarkup createPersonListKeyboard(List<Integer> personList, String personsType) {
+    private InlineKeyboardMarkup createPersonListKeyboard(List<Integer> personList, String personsType, Integer homePersonId) {
         Map<String, String> parentSections = new HashMap<>();
         for (int personId : personList) {
             PersonDto personDto = personService.getPerson(personId);
             parentSections.put(PERSON_BUTTON_PREFIX + personId, personDto.getFullName(personsType));
         }
-        parentSections.put(HOME_BUTTON, HOME_TEXT);
+        if (homePersonId != null) {
+            parentSections.put(HOME_BUTTON, HOME_TEXT);
+        }
         parentSections.put(DEFAULT_BUTTON, DEFAULT_TEXT);
         return MarkupTemplates.listEntityButtons(parentSections, 1);
     }

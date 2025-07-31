@@ -35,6 +35,9 @@ public class AccountEntity {
     @Column(name = "state")
     private State state;
 
+    @Column(name = "person_id")
+    private Integer personId;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

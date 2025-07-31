@@ -42,6 +42,10 @@ public class Constants {
     public static final String INTRO_TEXT = "Нажмите на кнопку \"Найти себя\", чтобы найти себя в семейном древе используя Телеграм идентификатор, или нажмите на кнопку \"Персона по-умолчанию\", чтобы загрузить персону по-умолчанию и начать путешествие по семейному древу.";
     public static final String WELCOME_PERSON_TEXT = "Добро пожаловать, ";
     public static final String WELCOME_UNKNOWN_TEXT = "Добро пожаловать!";
+    public static final String UNKNOWN_IDENTIFICATION_TEXT = "Вы не можете перейти на свою страницу, так как вы еще не идентифицированы!";
+    public static final String WRONG_IDENTIFICATION_TEXT_PREFIX = "Вы уже идентифицированы как ";
+    public static final String WRONG_IDENTIFICATION_TEXT_SUFFIX = ", и вы не можете повторно пройти идентификацию самостоятельно. Обратитесь к администратору.";
+    public static final String SUCCESS_IDENTIFICATION_TEXT = "Вы успешно прошли идентификацию! Приятно с вами познакомится, ";
 
     public record RelationshipGroup(
             String buttonPrefix,

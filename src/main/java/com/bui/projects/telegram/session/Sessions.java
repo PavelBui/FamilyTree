@@ -43,6 +43,7 @@ public class Sessions {
                 SessionUser.builder()
                         .chatId(account.getChatId())
                         .state(account.getState())
+                        .personId(account.getPersonId())
                         .firstname(account.getFirstName())
                         .lastname(account.getLastName())
                         .username(account.getUserName())

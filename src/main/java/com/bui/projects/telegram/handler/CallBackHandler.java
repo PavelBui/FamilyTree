@@ -1,5 +1,7 @@
 package com.bui.projects.telegram.handler;
 
+import com.bui.projects.dto.PersonDto;
+import com.bui.projects.service.PersonService;
 import com.bui.projects.telegram.BotKeeper;
 import com.bui.projects.telegram.util.enums.State;
 import com.bui.projects.telegram.service.BotMenuService;
@@ -22,10 +24,12 @@ import static com.bui.projects.telegram.util.Constants.*;
 public class CallBackHandler {
 
     public final BotKeeper botKeeper;
+    private final PersonService personService;
     private final BotMenuService botMenuService;
 
-    public CallBackHandler(BotKeeper botKeeper, BotMenuService botMenuService) {
+    public CallBackHandler(BotKeeper botKeeper, PersonService personService, BotMenuService botMenuService) {
         this.botKeeper = botKeeper;
+        this.personService = personService;
         this.botMenuService = botMenuService;
     }
 
@@ -38,21 +42,34 @@ public class CallBackHandler {
         String data = update.getCallbackQuery().getData();
         Integer messageId = getUpdateMessageId(update);
         Integer defaultPersonId = botKeeper.getTelegramBot().getDefaultPersonId();
+
+        PersonDto personDtoByChatId = personService.getPersonByChatId(chatId);
+        Integer homePersonId = personDtoByChatId != null ? personDtoByChatId.getId() : null;
+
         provideLog(chatId, data);
         if (HOME_BUTTON.equals(data)) {
             sessionUser.setState(State.HOME);
-            botKeeper.getBot().editPhoto(botMenuService.prepareHomePointEditMessageMedia(messageId, defaultPersonId));
+            PersonDto personDto = personService.getPersonByChatId(chatId);
+            if (personDto != null) {
+                sessionUser.setPersonId(personDto.getId());
+                botKeeper.getBot().editPhoto(botMenuService.prepareHomePointEditMessageMedia(personDto, messageId, defaultPersonId));
+            } else {
+                botKeeper.getBot().executeMessage(botMenuService.prepareSendMessage(UNKNOWN_IDENTIFICATION_TEXT));
+            }
             return;
         }
         if (DEFAULT_BUTTON.equals(data)) {
             sessionUser.setState(State.DEFAULT);
-            botKeeper.getBot().editPhoto(botMenuService.prepareDefaultPointEditMessageMedia(messageId, defaultPersonId));
+            sessionUser.setPersonId(defaultPersonId);
+            PersonDto personDto = personService.getPerson(defaultPersonId);
+            botKeeper.getBot().editPhoto(botMenuService.prepareDefaultPointEditMessageMedia(personDto, messageId, homePersonId));
             return;
         }
         if (data.startsWith(PHOTO_BUTTON_PREFIX)) {
             sessionUser.setState(State.PHOTO);
-            List<Message> photoMessageList = botKeeper.getBot().sendMediaGroup(botMenuService.preparePhotosSendMediaGroup(data.replace(PHOTO_BUTTON_PREFIX, "")));
-            botKeeper.getBot().executeMessage(botMenuService.prepareSendMessage(data.replace(PHOTO_BUTTON_PREFIX, ""), photoMessageList));
+            PersonDto personDto = personService.getPerson(Integer.parseInt(data.replace(PHOTO_BUTTON_PREFIX, "")));
+            List<Message> photoMessageList = botKeeper.getBot().sendMediaGroup(botMenuService.preparePhotosSendMediaGroup(personDto));
+            botKeeper.getBot().executeMessage(botMenuService.preparePhotosSendMessage(personDto, photoMessageList));
             botKeeper.getBot().deleteMessage(botMenuService.prepareDeleteMessage(messageId));
             return;
         }
@@ -64,20 +81,33 @@ public class CallBackHandler {
                     botKeeper.getBot().deleteMessage(botMenuService.prepareDeleteMessage(Integer.parseInt(companents[i])));
                 }
             }
-            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(messageId, companents[0].replace(PHOTO_BACK_BUTTON_PREFIX, ""), defaultPersonId));
+            PersonDto personDto = personService.getPerson(Integer.parseInt(companents[0].replace(PHOTO_BACK_BUTTON_PREFIX, "")));
+            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(personDto, messageId, homePersonId, defaultPersonId));
             return;
         }
         if (data.startsWith(PERSON_BUTTON_PREFIX)) {
             sessionUser.setState(State.TRAVEL);
-            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(messageId, data.replace(PERSON_BUTTON_PREFIX, ""), defaultPersonId));
+            PersonDto personDto = personService.getPerson(Integer.parseInt(data.replace(PERSON_BUTTON_PREFIX, "")));
+            sessionUser.setPersonId(personDto.getId());
+            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(personDto, messageId, homePersonId, defaultPersonId));
             return;
         }
         sessionUser.setState(State.TRAVEL);
         if (data.endsWith(MULTI_PERSON_BUTTON_SUFFIX)) {
-            botKeeper.getBot().editPhoto(botMenuService.preparePersonsListEditMessageMedia(messageId, data));
+            Integer personId = Integer.parseInt(data
+                    .replace(PARENTS.buttonPrefix(), "")
+                    .replace(KIDS.buttonPrefix(), "")
+                    .replace(SIBLINGS.buttonPrefix(), "")
+                    .replace(SPOUSES.buttonPrefix(), "")
+                    .replace(MULTI_PERSON_BUTTON_SUFFIX,""));
+            PersonDto personDto = personService.getPerson(personId);
+            sessionUser.setPersonId(personDto.getId());
+            botKeeper.getBot().editPhoto(botMenuService.preparePersonsListEditMessageMedia(personDto, messageId, data, homePersonId));
         } else {
             String[] components = data.split("_");
-            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(messageId, components[2], defaultPersonId));
+            PersonDto personDto = personService.getPerson(Integer.parseInt(components[2]));
+            sessionUser.setPersonId(personDto.getId());
+            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(personDto, messageId, homePersonId, defaultPersonId));
         }
     }
 

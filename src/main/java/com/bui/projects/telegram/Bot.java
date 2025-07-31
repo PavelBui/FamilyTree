@@ -15,6 +15,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.List;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -69,12 +71,13 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendMediaGroup(SendMediaGroup message) {
+    public List<Message> sendMediaGroup(SendMediaGroup message) {
         try {
-            execute(message);
+            return execute(message);
         } catch (TelegramApiException e) {
             log.error("Media executing failed {}", e.getMessage());
         }
+        return List.of();
     }
 
     public void editPhoto(EditMessageMedia editMessageMedia) {

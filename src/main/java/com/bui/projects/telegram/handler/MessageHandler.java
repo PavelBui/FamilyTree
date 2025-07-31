@@ -44,7 +44,7 @@ public class MessageHandler {
         Integer defaultPersonId = botKeeper.getTelegramBot().getDefaultPersonId();
         switch (messageText) {
             case HOME_COMMAND -> botKeeper.getBot().sendPhoto(botMenuService.prepareHomePointSendPhoto(defaultPersonId));
-            //case ME_COMMAND -> botKeeper.getBot().sendPhoto(botMenuService.sendNewHomePointMessage(sessionUser, defaultPersonId));
+            case ME_COMMAND -> botKeeper.getBot().sendPhoto(botMenuService.prepareHomePointSendPhoto(defaultPersonId));
         }
     }
 

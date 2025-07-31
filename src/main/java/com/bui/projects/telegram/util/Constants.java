@@ -19,6 +19,7 @@ public class Constants {
     public static final String HOME_BUTTON = "go_home";
     public static final String DEFAULT_BUTTON = "go_default";
     public static final String PHOTO_BUTTON_PREFIX = "go_photos_";
+    public static final String PHOTO_BACK_BUTTON_PREFIX = "go_person_after_photo_";
     public static final String PERSON_BUTTON_PREFIX = "go_person_";
     public static final String MULTI_PERSON_BUTTON_SUFFIX = "_multi";
 

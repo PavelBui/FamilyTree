@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -133,7 +134,7 @@ public class BotMenuService extends BaseService {
         return null;
     }
 
-    public SendMediaGroup preparePhotosSendMediaGroup(Integer messageId, String stringId) {
+    public SendMediaGroup preparePhotosSendMediaGroup(String stringId) {
         Integer personId = Integer.parseInt(stringId);
         PersonDto personDto = personService.getPerson(personId);
         if (personDto != null) {
@@ -141,7 +142,7 @@ public class BotMenuService extends BaseService {
             personDto.getPhotoIds().stream()
                     .limit(10)
                     .forEach(photoId -> tempFiles.add(getPersonPhotoFile(personDto, photoId)));
-            return createMediaGroupMessage(messageId, tempFiles);
+            return createMediaGroupMessage(tempFiles);
         }
         return null;
     }
@@ -153,15 +154,19 @@ public class BotMenuService extends BaseService {
         return deleteMessage;
     }
 
-    public SendMessage prepareSendMessage(String stringId) {
+    public SendMessage prepareSendMessage(String stringId, List<Message> photoMessageList) {
         PersonDto personDto = personService.getPerson(Integer.parseInt(stringId));
         if (personDto != null) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(chatId);
             sendMessage.setText("Выберите действие:");
 
+            StringBuilder photoMessageIds = new StringBuilder();
+            photoMessageList.stream()
+                    .forEach(message -> photoMessageIds.append("#").append(message.getMessageId()));
+
             Map<String, String> parentSections = new HashMap<>();
-            parentSections.put(PERSON_BUTTON_PREFIX + personDto.getId(), "Вернуться");
+            parentSections.put(PHOTO_BACK_BUTTON_PREFIX + personDto.getId() + photoMessageIds, "Вернуться");
             InlineKeyboardMarkup inlineKeyboardMarkup = MarkupTemplates.listEntityButtons(parentSections, 1);
             sendMessage.setReplyMarkup(inlineKeyboardMarkup);
             return sendMessage;
@@ -273,7 +278,7 @@ public class BotMenuService extends BaseService {
         return editMessageMedia;
     }
 
-    private SendMediaGroup createMediaGroupMessage(Integer messageId, List<File> files) {
+    private SendMediaGroup createMediaGroupMessage(List<File> files) {
         List<InputMedia> inputMediaList = new ArrayList<>();
         for (File file : files) {
             InputMedia inputMedia = new InputMediaPhoto();
@@ -282,8 +287,6 @@ public class BotMenuService extends BaseService {
         }
         SendMediaGroup sendMediaGroup = new SendMediaGroup(chatId.toString(), inputMediaList);
         sendMediaGroup.setChatId(chatId);
-        sendMediaGroup.setReplyToMessageId(messageId);
-        sendMediaGroup.setAllowSendingWithoutReply(true);
         sendMediaGroup.setProtectContent(true);
         return sendMediaGroup;
     }

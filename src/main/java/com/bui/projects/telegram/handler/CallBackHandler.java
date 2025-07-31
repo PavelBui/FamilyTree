@@ -9,8 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.MaybeInaccessibleMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.bui.projects.telegram.util.Constants.*;
@@ -49,9 +51,20 @@ public class CallBackHandler {
         }
         if (data.startsWith(PHOTO_BUTTON_PREFIX)) {
             sessionUser.setState(State.PHOTO);
-            botKeeper.getBot().sendMediaGroup(botMenuService.preparePhotosSendMediaGroup(messageId, data.replace(PHOTO_BUTTON_PREFIX, "")));
-            botKeeper.getBot().executeMessage(botMenuService.prepareSendMessage(data.replace(PHOTO_BUTTON_PREFIX, "")));
+            List<Message> photoMessageList = botKeeper.getBot().sendMediaGroup(botMenuService.preparePhotosSendMediaGroup(data.replace(PHOTO_BUTTON_PREFIX, "")));
+            botKeeper.getBot().executeMessage(botMenuService.prepareSendMessage(data.replace(PHOTO_BUTTON_PREFIX, ""), photoMessageList));
             botKeeper.getBot().deleteMessage(botMenuService.prepareDeleteMessage(messageId));
+            return;
+        }
+        if (data.startsWith(PHOTO_BACK_BUTTON_PREFIX)) {
+            sessionUser.setState(State.TRAVEL);
+            String[] companents = data.split("#");
+            if (companents.length > 1) {
+                for (int i = 1; i < companents.length; i++) {
+                    botKeeper.getBot().deleteMessage(botMenuService.prepareDeleteMessage(Integer.parseInt(companents[i])));
+                }
+            }
+            botKeeper.getBot().editPhoto(botMenuService.preparePersonEditMessageMedia(messageId, companents[0].replace(PHOTO_BACK_BUTTON_PREFIX, ""), defaultPersonId));
             return;
         }
         if (data.startsWith(PERSON_BUTTON_PREFIX)) {

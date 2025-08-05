@@ -29,9 +29,9 @@ public class PersonMapper {
         personEntity.setLastName(personDto.getLastName());
         personEntity.setMiddleName(personDto.getMiddleName());
         personEntity.setMaidenName(personDto.getMaidenName());
-        personEntity.setBirthDate(DateTimeUtils.convertStringToDate(personDto.getBirthDate()));
+        personEntity.setBirthDate(personDto.getBirthDate());
         personEntity.setBirthPlace(personDto.getBirthPlace());
-        personEntity.setDeathDate(DateTimeUtils.convertStringToDate(personDto.getDeathDate()));
+        personEntity.setDeathDate(personDto.getDeathDate());
         personEntity.setDeathPlace(personDto.getDeathPlace());
         personEntity.setGender(personDto.getGender());
         personEntity.setDescription(personDto.getDescription());
@@ -54,9 +54,9 @@ public class PersonMapper {
                 .lastName(personEntity.getLastName())
                 .middleName(personEntity.getMiddleName())
                 .maidenName(personEntity.getMaidenName())
-                .birthDate(DateTimeUtils.convertDateToString(personEntity.getBirthDate()))
+                .birthDate(personEntity.getBirthDate())
                 .birthPlace(personEntity.getBirthPlace())
-                .deathDate(DateTimeUtils.convertDateToString(personEntity.getDeathDate()))
+                .deathDate(personEntity.getDeathDate())
                 .deathPlace(personEntity.getDeathPlace())
                 .gender(personEntity.getGender())
                 .description(personEntity.getDescription())

@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -33,13 +32,13 @@ public class PersonEntity {
     private String maidenName;
 
     @Column(name = "birth_date")
-    private LocalDate birthDate;
+    private String birthDate;
 
     @Column(name = "birth_place")
     private String birthPlace;
 
     @Column(name = "death_date")
-    private LocalDate deathDate;
+    private String deathDate;
 
     @Column(name = "death_place")
     private String deathPlace;

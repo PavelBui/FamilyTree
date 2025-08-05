@@ -46,7 +46,7 @@ public class PersonDto {
             nameString
                     .append(this.getLastName());
         }
-        if (this.getMaidenName() != null) {
+        if (this.getMaidenName() != null && !this.getMaidenName().equals(this.getLastName())) {
             nameString
                     .append(" (")
                     .append(this.getMaidenName())
@@ -73,7 +73,7 @@ public class PersonDto {
                     .append(this.getBirthDate());
 
         }
-        if (this.getBirthPlace() != null) {
+        if (this.getBirthPlace() != null && !this.getBirthPlace().isEmpty()) {
             dateString
                     .append(" (")
                     .append(this.getBirthPlace())
@@ -82,11 +82,18 @@ public class PersonDto {
         }
         if (this.getBirthDate() != null && this.getDeathDate() != null) {
             dateString
-                    .append(this.getBirthDate())
-                    .append(" - ")
+                    .append(this.getBirthDate());
+            if (this.getBirthPlace() != null && !this.getBirthPlace().isEmpty()) {
+                dateString
+                        .append(" (")
+                        .append(this.getBirthPlace())
+                        .append(")");
+
+            }
+            dateString.append(" - ")
                     .append(this.getDeathDate());
         }
-        if (this.getDeathPlace() != null) {
+        if (this.getDeathPlace() != null && !this.getDeathPlace().isEmpty()) {
             dateString
                     .append(" (")
                     .append(this.getDeathPlace())
@@ -119,7 +126,7 @@ public class PersonDto {
             nameString
                     .append(this.getLastName());
         }
-        if (this.getMaidenName() != null) {
+        if (this.getMaidenName() != null && !this.getMaidenName().equals(this.lastName)) {
             nameString
                     .append(" (")
                     .append(this.getMaidenName())

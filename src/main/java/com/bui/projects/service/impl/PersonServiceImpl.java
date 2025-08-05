@@ -11,7 +11,6 @@ import com.bui.projects.service.PersonService;
 import com.bui.projects.mapper.PersonMapper;
 import com.bui.projects.repository.PersonRepository;
 import com.bui.projects.service.RelationshipService;
-import com.bui.projects.util.DateTimeUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -170,19 +169,19 @@ public class PersonServiceImpl implements PersonService {
                     .append(" ")
                     .append(personEntity.getMiddleName());
         }
-        if (DateTimeUtils.convertDateToString(personEntity.getBirthDate()) != null && DateTimeUtils.convertDateToString(personEntity.getDeathDate()) == null) {
+        if (personEntity.getBirthDate() != null && personEntity.getDeathDate() == null) {
             resultString
                     .append(" (род. ")
-                    .append(DateTimeUtils.convertDateToString(personEntity.getBirthDate()))
+                    .append(personEntity.getBirthDate())
                     .append(")");
 
         }
-        if (DateTimeUtils.convertDateToString(personEntity.getBirthDate()) != null && DateTimeUtils.convertDateToString(personEntity.getDeathDate()) != null) {
+        if (personEntity.getBirthDate() != null && personEntity.getDeathDate() != null) {
             resultString
                     .append(" (")
-                    .append(DateTimeUtils.convertDateToString(personEntity.getBirthDate()))
+                    .append(personEntity.getBirthDate())
                     .append(" - ")
-                    .append(DateTimeUtils.convertDateToString(personEntity.getDeathDate()))
+                    .append(personEntity.getDeathDate())
                     .append(")");
         }
         return resultString.toString();

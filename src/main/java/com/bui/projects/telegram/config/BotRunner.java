@@ -52,6 +52,7 @@ public class BotRunner {
     private Bot createBot(TelegramBotsApi api) {
         try {
             Bot bot = new Bot(updateHandler, telegramRequestContext, telegramBotProperties);
+            bot.clearWebhook();
             api.registerBot(bot);
             log.info("Connected to telegram bot");
             return bot;

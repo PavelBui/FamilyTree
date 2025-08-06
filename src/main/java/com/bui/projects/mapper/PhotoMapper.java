@@ -1,6 +1,7 @@
 package com.bui.projects.mapper;
 
 import com.bui.projects.dto.PhotoDto;
+import com.bui.projects.entity.PersonEntity;
 import com.bui.projects.entity.PhotoEntity;
 import com.bui.projects.repository.PhotoRepository;
 import lombok.AllArgsConstructor;
@@ -12,9 +13,9 @@ public class PhotoMapper {
 
     private PhotoRepository photoRepository;
 
-    public PhotoEntity dtoToEntity(PhotoDto photoDto) {
+    public PhotoEntity dtoToEntity(PhotoDto photoDto, PersonEntity personEntity) {
         return photoRepository.findByPath(photoDto.getPath())
-                        .orElse(new PhotoEntity(photoDto.getName(), photoDto.getPath(), photoDto.getPhotoBytes()));
+                        .orElse(new PhotoEntity(photoDto.getName(), photoDto.getPath(), photoDto.getPhotoBytes(), personEntity));
     }
 
     public PhotoDto entityToDto(PhotoEntity photoEntity) {

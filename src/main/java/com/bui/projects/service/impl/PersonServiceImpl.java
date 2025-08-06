@@ -7,6 +7,7 @@ import com.bui.projects.entity.PhotoEntity;
 import com.bui.projects.exeption.PersonNotFoundException;
 import com.bui.projects.exeption.PhotoNotFoundException;
 import com.bui.projects.mapper.PhotoMapper;
+import com.bui.projects.repository.PhotoRepository;
 import com.bui.projects.service.PersonService;
 import com.bui.projects.mapper.PersonMapper;
 import com.bui.projects.repository.PersonRepository;
@@ -27,6 +28,7 @@ public class PersonServiceImpl implements PersonService {
     private PersonMapper personMapper;
     private PersonRepository personRepository;
     private PhotoMapper photoMapper;
+    private PhotoRepository photoRepository;
     private RelationshipService relationshipService;
 
     @Override
@@ -82,16 +84,15 @@ public class PersonServiceImpl implements PersonService {
     //Photos
     @Override
     @Transactional
-    public void uploadPhoto(Integer id, PhotoDto photoDto) {
-        PersonEntity personEntity = personRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new PersonNotFoundException((id)));
-        personEntity.getPhotoEntities().add(photoMapper.dtoToEntity(photoDto));
-        personRepository.save(personEntity);
+    public void uploadPersonPhoto(Integer personId, PhotoDto photoDto) {
+        PersonEntity personEntity = personRepository.findByIdAndIsDeletedFalse(personId)
+                .orElseThrow(() -> new PersonNotFoundException((personId)));
+        photoRepository.save(photoMapper.dtoToEntity(photoDto, personEntity));
     }
 
     @Override
     @Transactional
-    public PhotoDto getPhoto(Integer personId, Integer photoId) {
+    public PhotoDto getPersonPhoto(Integer personId, Integer photoId) {
         PersonEntity personEntity = personRepository.findByIdAndIsDeletedFalse(personId)
                 .orElseThrow(() -> new PersonNotFoundException((personId)));
         PhotoEntity imageEntity = personEntity.getPhotoEntities().stream()
@@ -102,7 +103,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional
-    public List<PhotoDto> getAllPhotos(Integer id) {
+    public List<PhotoDto> getAllPersonPhotos(Integer id) {
         PersonEntity personEntity = personRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new PersonNotFoundException((id)));
         return personEntity.getPhotoEntities().stream()

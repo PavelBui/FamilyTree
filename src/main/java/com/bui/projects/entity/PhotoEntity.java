@@ -14,10 +14,11 @@ import javax.persistence.*;
 @Table(name = "photo")
 public class PhotoEntity {
 
-    public PhotoEntity(String name, String path, byte[] photoData) {
+    public PhotoEntity(String name, String path, byte[] photoData, PersonEntity personEntity) {
         this.name = name;
         this.path = path;
         this.photoData = photoData;
+        this.personEntity = personEntity;
     }
 
     @Id
@@ -34,4 +35,8 @@ public class PhotoEntity {
     @Lob
     @Column(name = "photo_data", length = 1000)
     private byte[] photoData;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false)
+    private PersonEntity personEntity;
 }

@@ -42,7 +42,7 @@ public class PersonMapper {
 
     public PersonDto entityToDto(PersonEntity personEntity) {
         List<Integer> photoIdList = new ArrayList<>();
-        Set<PhotoEntity> imageEntitySet = personEntity.getPhotoEntities();
+        List<PhotoEntity> imageEntitySet = personEntity.getPhotoEntities();
         if (imageEntitySet != null) {
             photoIdList = imageEntitySet.stream()
                     .map(PhotoEntity::getId)

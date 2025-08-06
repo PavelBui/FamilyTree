@@ -286,7 +286,7 @@ public class BotMenuService extends BaseService {
     @SneakyThrows
     private File getPersonPhotoFile(PersonDto personDto, Integer photoId) {
         if (personDto.getDefaultPhotoId() != null) {
-            PhotoDto photoDto = personService.getPhoto(personDto.getId(), photoId);
+            PhotoDto photoDto = personService.getPersonPhoto(personDto.getId(), photoId);
             File tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX + personDto.getLastName() + personDto.getLastName());
             try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 fos.write(photoDto.getPhotoBytes());

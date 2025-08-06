@@ -15,15 +15,15 @@ public interface PersonService {
 
     PersonDto getPerson(Integer id);
 
+    void uploadPersonPhoto(Integer id, PhotoDto photoDto);
+
     PersonDto getPersonByChatId(Long chatId);
 
     List<PersonDto> getAllPersons();
 
-    void uploadPhoto(Integer id, PhotoDto photoDto);
+    PhotoDto getPersonPhoto(Integer personId, Integer photoId);
 
-    PhotoDto getPhoto(Integer personId, Integer photoId);
-
-    List<PhotoDto> getAllPhotos(Integer id);
+    List<PhotoDto> getAllPersonPhotos(Integer id);
 
     String addRelationship(Integer peronId, Integer relatedPersonId, Integer relationType);
 

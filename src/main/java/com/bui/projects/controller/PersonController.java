@@ -73,7 +73,7 @@ public class PersonController {
                     .path(PREFIX_PATH + file.getOriginalFilename())
                     .photoBytes(file.getBytes())
                     .build();
-            personService.uploadPhoto(id, photoDto);
+            personService.uploadPersonPhoto(id, photoDto);
             return ResponseEntity.ok("Photo was uploaded successfully!");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -86,13 +86,13 @@ public class PersonController {
     public ResponseEntity<byte[]> getPhoto(@PathVariable Integer id, @PathVariable Integer photoId) {
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_JPEG)
-                .body(personService.getPhoto(id, photoId).getPhotoBytes());
+                .body(personService.getPersonPhoto(id, photoId).getPhotoBytes());
     }
 
     @GetMapping("/{id}/photo")
     @ApiOperation("Get all photos for Person by id")
     public ResponseEntity<List<PhotoDto>> getAllPhotos(@PathVariable Integer id) {
-        return ResponseEntity.ok(personService.getAllPhotos(id));
+        return ResponseEntity.ok(personService.getAllPersonPhotos(id));
     }
 
     //Relationships

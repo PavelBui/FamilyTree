@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Data
@@ -58,14 +58,13 @@ public class PersonEntity {
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "default_photo_id")
     private PhotoEntity defaultPhoto;
 
     @Column
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "persons_photos")
-    private Set<PhotoEntity> photoEntities;
+    @OneToMany(mappedBy = "personEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PhotoEntity> photoEntities;
 
     @Column(name = "chat_id")
     private Long chatId;

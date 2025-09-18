@@ -1,11 +1,11 @@
 package com.bui.projects.entity;
 
 import com.bui.projects.telegram.util.enums.State;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
